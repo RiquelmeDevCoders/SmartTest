@@ -16,7 +16,7 @@ let authToken = localStorage.getItem('authToken'); // Token de autenticação
 // Base URL da API - ALTERE ESTA URL APÓS O DEPLOY NO RENDER
 const API_BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:3000/api' 
-    : 'https://SEU-BACKEND-URL.onrender.com/api';
+    : 'https://smarttest-q17g.onrender.com';
 
 // Elementos DOM
 const sections = document.querySelectorAll('.section');
