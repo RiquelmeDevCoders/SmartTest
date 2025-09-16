@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTest AI - Simulador de Provas com IA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>SmartTest <span>AI</span></h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-section="home">Início</a></li>
+                    <li><a href="#" class="nav-link" data-section="subjects">Disciplinas</a></li>
+                    <li><a href="#" class="nav-link" data-section="ranking">Ranking</a></li>
+                    <li><a href="#" class="nav-link" data-section="profile">Perfil</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button id="loginBtn" class="btn btn-outline">Entrar</button>
+                <button id="registerBtn" class="btn btn-primary">Cadastrar</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Seção Home -->
+        <section id="home" class="section active">
+            <div class="container">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h2>Prepare-se para provas com <span>Inteligência Artificial</span></h2>
+                        <p>O SmartTest AI utiliza tecnologia avançada para criar simulados personalizados com base no
+                            seu desempenho.</p>
+                        <button id="startJourney" class="btn btn-primary btn-large">Começar Agora</button>
+                    </div>
+                    <div class="hero-image">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNkEwREFEIiBvcGFjaXR5PSIwLjEiLz48ZyBmaWxsPSIjNkEwREFDIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTAsIDEyMCkiPjxjaXJjbGUgcj0iNTAiIGZpbGw9IiM4QjQ2RTAiIG9wYWNpdHk9IjAuNyIvPjxjaXJjbGUgY3g9IjcwIiBjeT0iLTQwIiByPSI0MCIgZmlsbD0iI0ZGMzk4MCIgb3BhY2l0eT0iMC43Ii8+PGNpcmNsZSBjeD0iLTQwIiBjeT0iLTMwIiByPSIzNSIgZmlsbD0iIzRDQTNGRiIgb3BhY2l0eT0iMC43Ii8+PGNpcmNsZSBjeD0iLTUwIiBjeT0iNDAiIHI9IjQ1IiBmaWxsPSIjNENBM0ZGIiBvcGFjaXR5PSIwLjciLz48L2c+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzZBMERBRCIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U21hcnRUZXN0IEFJPC90ZXh0Pjwvc3ZnPg=="
+                            alt="SmartTest AI">
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h2>Como funciona</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-robot"></i>
+                            <h3>IA Generativa</h3>
+                            <p>Perguntas geradas automaticamente pela IA Gemini 1.5 com base no tema escolhido.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Dificuldade Adaptativa</h3>
+                            <p>O sistema ajusta a dificuldade das questões conforme seu desempenho.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-trophy"></i>
+                            <h3>Gamificação</h3>
+                            <p>Ganhe pontos, moedas e medalhas conforme seu progresso.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-chart-pie"></i>
+                            <h3>Relatórios Detalhados</h3>
+                            <p>Relatórios completos com análise de desempenho e recomendações de estudo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Disciplinas -->
+        <section id="subjects" class="section">
+            <div class="container">
+                <h2>Escolha uma disciplina</h2>
+                <p class="section-description">Selecione uma matéria para iniciar o simulado</p>
+
+                <div class="subjects-grid">
+                    <div class="subject-card" data-subject="matematica">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Matemática</h3>
+                        <p>Álgebra, geometria, cálculo e mais</p>
+                    </div>
+                    <div class="subject-card" data-subject="portugues">
+                        <i class="fas fa-book"></i>
+                        <h3>Português</h3>
+                        <p>Gramática, literatura e interpretação de texto</p>
+                    </div>
+                    <div class="subject-card" data-subject="historia">
+                        <i class="fas fa-landmark"></i>
+                        <h3>História</h3>
+                        <p>História do Brasil e história mundial</p>
+                    </div>
+                    <div class="subject-card" data-subject="geografia">
+                        <i class="fas fa-globe-americas"></i>
+                        <h3>Geografia</h3>
+                        <p>Geografia física e geografia humana</p>
+                    </div>
+                    <div class="subject-card" data-subject="biologia">
+                        <i class="fas fa-dna"></i>
+                        <h3>Biologia</h3>
+                        <p>Anatomia, ecologia, genética e mais</p>
+                    </div>
+                    <div class="subject-card" data-subject="quimica">
+                        <i class="fas fa-flask"></i>
+                        <h3>Química</h3>
+                        <p>Química orgânica, inorgânica e físico-química</p>
+                    </div>
+                    <div class="subject-card" data-subject="fisica">
+                        <i class="fas fa-atom"></i>
+                        <h3>Física</h3>
+                        <p>Mecânica, termodinâmica, óptica e mais</p>
+                    </div>
+                    <div class="subject-card" data-subject="ingles">
+                        <i class="fas fa-language"></i>
+                        <h3>Inglês</h3>
+                        <p>Gramática, vocabulário e interpretação de texto</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Prova -->
+        <section id="quiz" class="section">
+            <div class="container">
+                <div class="quiz-header">
+                    <div class="quiz-info">
+                        <h2 id="quiz-subject">Matemática</h2>
+                        <p>Questão <span id="current-question">1</span> de <span id="total-questions">10</span></p>
+                    </div>
+                    <div class="quiz-timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer">15:00</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-card">
+                        <h3 id="question-text">Qual é a derivada de f(x) = 3x² + 2x - 5?</h3>
+                        <div class="options-container">
+                            <div class="option" data-option="A">
+                                <span class="option-letter">A</span>
+                                <span class="option-text">f'(x) = 6x + 2</span>
+                            </div>
+                            <div class="option" data-option="B">
+                                <span class="option-letter">B</span>
+                                <span class="option-text">f'(x) = 3x + 2</span>
+                            </div>
+                            <div class="option" data-option="C">
+                                <span class="option-letter">C</span>
+                                <span class="option-text">f'(x) = 6x - 5</span>
+                            </div>
+                            <div class="option" data-option="D">
+                                <span class="option-letter">D</span>
+                                <span class="option-text">f'(x) = 3x² + 2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-feedback" id="quiz-feedback">
+                    <div class="feedback-content">
+                        <i class="fas fa-check-circle"></i>
+                        <p>Resposta correta! Muito bem!</p>
+                    </div>
+                </div>
+
+                <div class="quiz-controls">
+                    <button id="next-question" class="btn btn-primary">Próxima Questão</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Resultados -->
+        <section id="results" class="section">
+            <div class="container">
+                <div class="results-header">
+                    <h2>Resultado do Simulado</h2>
+                    <p>Desempenho em <span id="result-subject">Matemática</span></p>
+                </div>
+
+                <div class="results-content">
+                    <div class="score-card">
+                        <div class="score-circle">
+                            <svg class="progress-ring" width="200" height="200">
+                                <circle class="progress-ring-circle" stroke-width="10" fill="transparent" r="90"
+                                    cx="100" cy="100" />
+                                <circle class="progress-ring-circle fill" stroke-width="10" fill="transparent" r="90"
+                                    cx="100" cy="100" />
+                            </svg>
+                            <div class="score-text">
+                                <span id="score-percent">75%</span>
+                                <span>de acerto</span>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <div class="score-detail">
+                                <span class="detail-value" id="correct-answers">7</span>
+                                <span class="detail-label">Respostas corretas</span>
+                            </div>
+                            <div class="score-detail">
+                                <span class="detail-value" id="incorrect-answers">3</span>
+                                <span class="detail-label">Respostas incorretas</span>
+                            </div>
+                            <div class="score-detail">
+                                <span class="detail-value" id="time-spent">12:45</span>
+                                <span class="detail-label">Tempo gasto</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recommendations">
+                        <h3>Recomendações de estudo</h3>
+                        <div class="recommendations-list">
+                            <div class="recommendation">
+                                <i class="fas fa-lightbulb"></i>
+                                <p>Revise derivadas de funções polinomiais</p>
+                            </div>
+                            <div class="recommendation">
+                                <i class="fas fa-lightbulb"></i>
+                                <p>Pratique mais exercícios de cálculo diferencial</p>
+                            </div>
+                            <div class="recommendation">
+                                <i class="fas fa-lightbulb"></i>
+                                <p>Estude as regras de derivação</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-actions">
+                        <button id="back-to-subjects" class="btn btn-outline">Voltar para disciplinas</button>
+                        <button id="try-again" class="btn btn-primary">Tentar novamente</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Ranking -->
+        <section id="ranking" class="section">
+            <div class="container">
+                <h2>Ranking Global</h2>
+                <p class="section-description">Veja como você se compara com outros estudantes</p>
+
+                <div class="ranking-tabs">
+                    <button class="tab-btn active" data-tab="global">Global</button>
+                    <button class="tab-btn" data-tab="monthly">Este mês</button>
+                    <button class="tab-btn" data-tab="weekly">Esta semana</button>
+                </div>
+
+                <div class="ranking-content">
+                    <div class="ranking-list">
+                        <div class="ranking-item first">
+                            <div class="rank">1</div>
+                            <div class="user-info">
+                                <div class="avatar">C</div>
+                                <div class="name-points">
+                                    <span class="name">Carlos Silva</span>
+                                    <span class="points">2,450 pontos</span>
+                                </div>
+                            </div>
+                            <div class="badges">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                        </div>
+                        <div class="ranking-item second">
+                            <div class="rank">2</div>
+                            <div class="user-info">
+                                <div class="avatar">A</div>
+                                <div class="name-points">
+                                    <span class="name">Ana Oliveira</span>
+                                    <span class="points">2,320 pontos</span>
+                                </div>
+                            </div>
+                            <div class="badges">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                        </div>
+                        <div class="ranking-item third">
+                            <div class="rank">3</div>
+                            <div class="user-info">
+                                <div class="avatar">M</div>
+                                <div class="name-points">
+                                    <span class="name">Maria Santos</span>
+                                    <span class="points">2,150 pontos</span>
+                                </div>
+                            </div>
+                            <div class="badges">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank">4</div>
+                            <div class="user-info">
+                                <div class="avatar">P</div>
+                                <div class="name-points">
+                                    <span class="name">Pedro Costa</span>
+                                    <span class="points">1,980 pontos</span>
+                                </div>
+                            </div>
+                            <div class="badges">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="ranking-item current-user">
+                            <div class="rank">7</div>
+                            <div class="user-info">
+                                <div class="avatar">V</div>
+                                <div class="name-points">
+                                    <span class="name">Você</span>
+                                    <span class="points">1,750 pontos</span>
+                                </div>
+                            </div>
+                            <div class="badges">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal de Login -->
+        <div class="modal" id="loginModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Entrar na plataforma</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" placeholder="Seu e-mail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Senha</label>
+                            <input type="password" id="password" placeholder="Sua senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+                    </form>
+                    <div class="auth-divider">
+                        <span>ou</span>
+                    </div>
+                    <button class="btn btn-google btn-full">
+                        <i class="fab fa-google"></i>
+                        Entrar com Google
+                    </button>
+                    <div class="auth-links">
+                        <p>Não tem uma conta? <a href="#" id="goToRegister">Cadastre-se</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Cadastro -->
+        <div class="modal" id="registerModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Criar uma conta</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="name">Nome completo</label>
+                            <input type="text" id="name" placeholder="Seu nome completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">E-mail</label>
+                            <input type="email" id="register-email" placeholder="Seu e-mail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Senha</label>
+                            <input type="password" id="register-password" placeholder="Crie uma senha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirmar senha</label>
+                            <input type="password" id="confirm-password" placeholder="Confirme sua senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Criar conta</button>
+                    </form>
+                    <div class="auth-divider">
+                        <span>ou</span>
+                    </div>
+                    <button class="btn btn-google btn-full">
+                        <i class="fab fa-google"></i>
+                        Cadastrar com Google
+                    </button>
+                    <div class="auth-links">
+                        <p>Já tem uma conta? <a href="#" id="goToLogin">Faça login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-brain"></i>
+                    <span>SmartTest <span>AI</span></span>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Sobre</a>
+                    <a href="#">Contato</a>
+                    <a href="#">Termos de uso</a>
+                    <a href="#">Política de privacidade</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2023 SmartTest AI. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+
+</html>
