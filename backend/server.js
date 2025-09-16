@@ -10,14 +10,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'smarttest-secret-key';
 
+// Configurar CORS para aceitar requests do Netlify
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://smarttestai.netlify.app';
+
+app.use(cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Middleware para preflight requests
+app.options('*', cors());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Inicializar Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public'));
 
 // Simulação de banco de dados em memória
 let users = [];
@@ -159,7 +170,7 @@ function parseGeminiResponse(text) {
     return questions;
 }
 
-// Rotas de autenticação (sem alterações)
+// Rotas de autenticação
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -238,7 +249,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Rota MODIFICADA para gerar questões com Gemini
+// Rota para gerar questões com Gemini
 app.post('/api/generate-questions', authenticateToken, async (req, res) => {
     try {
         const { subject, difficulty = 'medium', count = 5 } = req.body;
@@ -297,9 +308,6 @@ app.post('/api/generate-questions', authenticateToken, async (req, res) => {
             difficulty: q.difficulty
         }));
 
-        // Salvar questões para correção posterior
-        req.generatedQuestions = selectedQuestions;
-
         res.json({
             questions: questionsForClient,
             total: questionsForClient.length,
@@ -313,7 +321,7 @@ app.post('/api/generate-questions', authenticateToken, async (req, res) => {
     }
 });
 
-// Rota MODIFICADA para verificar respostas
+// Rota para verificar respostas
 app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
     try {
         const { subject, answers, questionsData } = req.body;
@@ -430,7 +438,7 @@ function getDefaultRecommendations(subject, accuracy) {
     ];
 }
 
-// Rotas restantes (sem alterações)
+// Rotas restantes
 app.get('/api/ranking', (req, res) => {
     try {
         const { period = 'global' } = req.query;
@@ -482,11 +490,33 @@ app.get('/api/profile', authenticateToken, (req, res) => {
     }
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        message: 'Server is running',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Rota padrão - removida pois o frontend está no Netlify
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect(FRONTEND_URL);
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+    res.status(404).json({ message: 'Endpoint não encontrado' });
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-    console.log(`Acesse: http://localhost:${PORT}`);
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+    console.log(`📱 Frontend: ${FRONTEND_URL}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
 });
