@@ -1,24 +1,21 @@
-// Variáveis globais
 let currentSection = 'home';
 let currentSubject = '';
 let timerInterval;
-let timeLeft = 900; // 15 minutos em segundos
+let timeLeft = 900;
 let currentQuestion = 1;
-let totalQuestions = 5; // Reduzido para economizar API
+let totalQuestions = 5;
 let score = 0;
 let correctAnswers = 0;
 let incorrectAnswers = 0;
-let currentQuestions = []; // Para armazenar as questões atuais
-let userAnswers = []; // Para armazenar as respostas do usuário
-let questionsData = []; // Para armazenar dados das questões incluindo respostas corretas
-let authToken = localStorage.getItem('authToken'); // Token de autenticação
+let currentQuestions = [];
+let userAnswers = [];
+let questionsData = [];
+let authToken = null;
 
-// Base URL da API - CORRIGIDA para incluir /api
 const API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000/api'
-    : 'https://smarttest-1.onrender.com/api'; // ← ADICIONADO /api NO FINAL
+    : 'https://smarttest-1.onrender.com/api';
 
-// Elementos DOM
 const sections = document.querySelectorAll('.section');
 const navLinks = document.querySelectorAll('.nav-link');
 const subjectCards = document.querySelectorAll('.subject-card');
@@ -37,40 +34,31 @@ const startJourneyBtn = document.getElementById('startJourney');
 const backToSubjectsBtn = document.getElementById('back-to-subjects');
 const tryAgainBtn = document.getElementById('try-again');
 
-// Debug: Verificar URLs
-console.log('API_BASE_URL:', API_BASE_URL);
-console.log('Login URL:', `${API_BASE_URL}/login`);
-console.log('Register URL:', `${API_BASE_URL}/register`);
-
-// Inicialização
 document.addEventListener('DOMContentLoaded', function () {
+    initializeApp();
+});
+
+function initializeApp() {
+    authToken = localStorage.getItem('authToken');
+    
     setupNavigation();
     setupModals();
     setupQuiz();
     setupActionButtons();
-
-    // Verificar se o usuário está logado
+    
     if (authToken) {
         updateAuthUI(true);
         loadRanking();
     }
-});
+}
 
-// Atualizar interface de autenticação
 function updateAuthUI(isLoggedIn) {
-    if (isLoggedIn) {
-        loginBtn.style.display = 'none';
-        registerBtn.style.display = 'none';
-        // Poderia adicionar botão de logout aqui
-    } else {
-        loginBtn.style.display = 'inline-block';
-        registerBtn.style.display = 'inline-block';
+    if (loginBtn && registerBtn) {
+        loginBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
+        registerBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
     }
 }
 
-console.log("Token salvo:", authToken);
-
-// Função para fazer requisições autenticadas - CORRIGIDA
 async function authenticatedFetch(url, options = {}) {
     const config = {
         ...options,
@@ -80,8 +68,6 @@ async function authenticatedFetch(url, options = {}) {
         }
     };
 
-    console.log("➡️ Chamando:", url, "com headers", config.headers); // ← CORRIGIDO: options.headers → config.headers
-
     if (authToken) {
         config.headers.Authorization = `Bearer ${authToken}`;
     }
@@ -90,12 +76,13 @@ async function authenticatedFetch(url, options = {}) {
         const response = await fetch(url, config);
 
         if (response.status === 401) {
-            // Token expirado, remover e redirecionar para login
-            localStorage.removeItem('authToken');
-            authToken = null;
-            updateAuthUI(false);
-            alert('Sessão expirada. Faça login novamente.');
+            handleAuthError();
             return null;
+        }
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP ${response.status}`);
         }
 
         return response;
@@ -105,17 +92,22 @@ async function authenticatedFetch(url, options = {}) {
     }
 }
 
-// Configuração da navegação
+function handleAuthError() {
+    localStorage.removeItem('authToken');
+    authToken = null;
+    updateAuthUI(false);
+    showNotification('Sessão expirada. Faça login novamente.', 'error');
+}
+
 function setupNavigation() {
     navLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
             const sectionId = this.getAttribute('data-section');
 
-            // Verificar se precisa de autenticação
             if ((sectionId === 'ranking' || sectionId === 'profile') && !authToken) {
-                alert('Faça login para acessar esta seção');
-                loginModal.classList.add('show');
+                showNotification('Faça login para acessar esta seção', 'warning');
+                if (loginModal) loginModal.classList.add('show');
                 return;
             }
 
@@ -124,13 +116,15 @@ function setupNavigation() {
     });
 }
 
-// Mostrar seção específica
 function showSection(sectionId) {
     sections.forEach(section => {
         section.classList.remove('active');
     });
 
-    document.getElementById(sectionId).classList.add('active');
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
 
     navLinks.forEach(link => {
         link.classList.remove('active');
@@ -141,7 +135,6 @@ function showSection(sectionId) {
 
     currentSection = sectionId;
 
-    // Carregar dados específicos da seção
     if (sectionId === 'quiz') {
         startTimer();
     } else if (sectionId === 'ranking') {
@@ -149,181 +142,193 @@ function showSection(sectionId) {
     }
 }
 
-// Configuração dos modais
 function setupModals() {
-    loginBtn.addEventListener('click', () => {
-        loginModal.classList.add('show');
-    });
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            if (loginModal) loginModal.classList.add('show');
+        });
+    }
 
-    registerBtn.addEventListener('click', () => {
-        registerModal.classList.add('show');
-    });
+    if (registerBtn) {
+        registerBtn.addEventListener('click', () => {
+            if (registerModal) registerModal.classList.add('show');
+        });
+    }
 
     closeModalButtons.forEach(button => {
         button.addEventListener('click', () => {
-            loginModal.classList.remove('show');
-            registerModal.classList.remove('show');
+            if (loginModal) loginModal.classList.remove('show');
+            if (registerModal) registerModal.classList.remove('show');
         });
     });
 
-    goToRegister.addEventListener('click', (e) => {
-        e.preventDefault();
-        loginModal.classList.remove('show');
-        registerModal.classList.add('show');
-    });
+    if (goToRegister) {
+        goToRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (loginModal) loginModal.classList.remove('show');
+            if (registerModal) registerModal.classList.add('show');
+        });
+    }
 
-    goToLogin.addEventListener('click', (e) => {
-        e.preventDefault();
-        registerModal.classList.remove('show');
-        loginModal.classList.add('show');
-    });
+    if (goToLogin) {
+        goToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (registerModal) registerModal.classList.remove('show');
+            if (loginModal) loginModal.classList.add('show');
+        });
+    }
 
     window.addEventListener('click', (e) => {
-        if (e.target === loginModal) {
+        if (e.target === loginModal && loginModal) {
             loginModal.classList.remove('show');
         }
-        if (e.target === registerModal) {
+        if (e.target === registerModal && registerModal) {
             registerModal.classList.remove('show');
         }
     });
 
-    // Formulário de login
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            // Verificar se a resposta é JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Resposta do servidor não é JSON');
-            }
-
-            const data = await response.json();
-
-            if (response.ok) {
-                authToken = data.token;
-                localStorage.setItem('authToken', authToken);
-                updateAuthUI(true);
-                loginModal.classList.remove('show');
-                alert('Login realizado com sucesso!');
-            } else {
-                alert(data.message || 'Erro ao fazer login');
-            }
-        } catch (error) {
-            console.error('Erro no login:', error);
-            alert('Erro de conexão. Verifique o console para mais detalhes.');
-        }
-    });
-
-    // Formulário de registro
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-
-        if (password !== confirmPassword) {
-            alert('As senhas não coincidem');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, email, password })
-            });
-
-            // Verificar se a resposta é JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Resposta do servidor não é JSON');
-            }
-
-            const data = await response.json();
-
-            if (response.ok) {
-                authToken = data.token;
-                localStorage.setItem('authToken', authToken);
-                updateAuthUI(true);
-                registerModal.classList.remove('show');
-                alert('Conta criada com sucesso!');
-            } else {
-                alert(data.message || 'Erro ao criar conta');
-            }
-        } catch (error) {
-            console.error('Erro no registro:', error);
-            alert('Erro de conexão. Verifique o console para mais detalhes.');
-        }
-    });
+    setupAuthForms();
 }
 
-// Configuração do questionário
+function setupAuthForms() {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email')?.value;
+    const password = document.getElementById('password')?.value;
+
+    if (!email || !password) {
+        showNotification('Preencha todos os campos', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            authToken = data.token;
+            localStorage.setItem('authToken', authToken);
+            updateAuthUI(true);
+            if (loginModal) loginModal.classList.remove('show');
+            showNotification('Login realizado com sucesso!', 'success');
+            document.getElementById('loginForm').reset();
+        } else {
+            showNotification(data.message || 'Erro ao fazer login', 'error');
+        }
+    } catch (error) {
+        console.error('Erro no login:', error);
+        showNotification('Erro de conexão. Tente novamente.', 'error');
+    }
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('name')?.value;
+    const email = document.getElementById('register-email')?.value;
+    const password = document.getElementById('register-password')?.value;
+    const confirmPassword = document.getElementById('confirm-password')?.value;
+
+    if (!name || !email || !password || !confirmPassword) {
+        showNotification('Preencha todos os campos', 'error');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showNotification('As senhas não coincidem', 'error');
+        return;
+    }
+
+    if (password.length < 6) {
+        showNotification('A senha deve ter pelo menos 6 caracteres', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            authToken = data.token;
+            localStorage.setItem('authToken', authToken);
+            updateAuthUI(true);
+            if (registerModal) registerModal.classList.remove('show');
+            showNotification('Conta criada com sucesso!', 'success');
+            document.getElementById('registerForm').reset();
+        } else {
+            showNotification(data.message || 'Erro ao criar conta', 'error');
+        }
+    } catch (error) {
+        console.error('Erro no registro:', error);
+        showNotification('Erro de conexão. Tente novamente.', 'error');
+    }
+}
+
 function setupQuiz() {
     subjectCards.forEach(card => {
         card.addEventListener('click', async () => {
             if (!authToken) {
-                alert('Faça login para iniciar o simulado');
-                loginModal.classList.add('show');
+                showNotification('Faça login para iniciar o simulado', 'warning');
+                if (loginModal) loginModal.classList.add('show');
                 return;
             }
 
             currentSubject = card.getAttribute('data-subject');
-            document.getElementById('quiz-subject').textContent =
-                capitalizeFirstLetter(currentSubject);
-            document.getElementById('result-subject').textContent =
-                capitalizeFirstLetter(currentSubject);
+            
+            const quizSubjectEl = document.getElementById('quiz-subject');
+            const resultSubjectEl = document.getElementById('result-subject');
+            
+            if (quizSubjectEl) quizSubjectEl.textContent = capitalizeFirstLetter(currentSubject);
+            if (resultSubjectEl) resultSubjectEl.textContent = capitalizeFirstLetter(currentSubject);
 
-            // Carregar questões da API (com Gemini)
             await loadQuestions();
             showSection('quiz');
         });
     });
 
-    nextQuestionBtn.addEventListener('click', () => {
-        if (currentQuestion < totalQuestions) {
-            currentQuestion++;
-            updateQuestionProgress();
-            loadCurrentQuestion();
-        } else {
-            finishQuiz();
-        }
-    });
+    if (nextQuestionBtn) {
+        nextQuestionBtn.addEventListener('click', () => {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                updateQuestionProgress();
+                loadCurrentQuestion();
+            } else {
+                finishQuiz();
+            }
+        });
+    }
 }
 
-// Carregar questões da API com Gemini
 async function loadQuestions() {
+    const container = document.querySelector('.question-container');
+    if (!container) return;
+
+    showLoadingQuestions(container);
+
     try {
-        // Mostrar loading
-        const loadingDiv = document.createElement('div');
-        loadingDiv.id = 'loading-questions';
-        loadingDiv.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 20px;"></i>
-                <p>Gerando questões personalizadas com IA Gemini...</p>
-                <p style="font-size: 0.9rem; color: #666;">Isso pode levar alguns segundos</p>
-            </div>
-        `;
-
-        const container = document.querySelector('.question-container');
-        container.innerHTML = '';
-        container.appendChild(loadingDiv);
-
         const response = await authenticatedFetch(`${API_BASE_URL}/generate-questions`, {
             method: 'POST',
             body: JSON.stringify({
@@ -339,94 +344,102 @@ async function loadQuestions() {
 
         if (response.ok) {
             currentQuestions = data.questions;
+            questionsData = data._questionsData || [];
             totalQuestions = data.total;
             userAnswers = new Array(totalQuestions);
             currentQuestion = 1;
 
-            // Restaurar estrutura HTML original
-            container.innerHTML = `
-                <div class="question-card">
-                    <h3 id="question-text"></h3>
-                    <div class="options-container">
-                        <div class="option" data-option="A">
-                            <span class="option-letter">A</span>
-                            <span class="option-text"></span>
-                        </div>
-                        <div class="option" data-option="B">
-                            <span class="option-letter">B</span>
-                            <span class="option-text"></span>
-                        </div>
-                        <div class="option" data-option="C">
-                            <span class="option-letter">C</span>
-                            <span class="option-text"></span>
-                        </div>
-                        <div class='option' data-option="D">
-                            <span class="option-letter">D</span>
-                            <span class="option-text"></span>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Reconfigurar event listeners para as opções
+            setupQuestionContainer(container);
             setupQuizOptions();
-
             updateQuestionProgress();
             loadCurrentQuestion();
 
-            console.log(`Questões ${data.source === 'gemini' ? 'geradas pela IA Gemini' : 'carregadas do cache'}`);
+            console.log(`Questões carregadas: ${data.source === 'gemini' ? 'IA Gemini' : 'Banco de dados'}`);
         } else {
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff6b6b; margin-bottom: 20px;"></i>
-                    <p>Erro ao gerar questões: ${data.message || 'Erro desconhecido'}</p>
-                    <button onclick="loadQuestions()" class="btn btn-primary" style="margin-top: 20px;">Tentar Novamente</button>
-                </div>
-            `;
+            showErrorMessage(container, data.message || 'Erro ao gerar questões');
         }
     } catch (error) {
-        console.error('Erro de conexão:', error);
-        const container = document.querySelector('.question-container');
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-wifi" style="font-size: 2rem; color: #ff6b6b; margin-bottom: 20px;"></i>
-                <p>Erro de conexão: ${error.message}</p>
-                <button onclick="loadQuestions()" class="btn btn-primary" style="margin-top: 20px;">Tentar Novamente</button>
-            </div>
-        `;
+        console.error('Erro ao carregar questões:', error);
+        showErrorMessage(container, 'Erro de conexão. Tente novamente.');
     }
 }
 
-// Configurar event listeners das opções
+function showLoadingQuestions(container) {
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 20px;"></i>
+            <p>Gerando questões personalizadas...</p>
+            <p style="font-size: 0.9rem; color: #666;">Aguarde alguns segundos</p>
+        </div>
+    `;
+}
+
+function showErrorMessage(container, message) {
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff6b6b; margin-bottom: 20px;"></i>
+            <p>${message}</p>
+            <button onclick="loadQuestions()" class="btn btn-primary" style="margin-top: 20px;">Tentar Novamente</button>
+        </div>
+    `;
+}
+
+function setupQuestionContainer(container) {
+    container.innerHTML = `
+        <div class="question-card">
+            <h3 id="question-text"></h3>
+            <div class="options-container">
+                <div class="option" data-option="A">
+                    <span class="option-letter">A</span>
+                    <span class="option-text"></span>
+                </div>
+                <div class="option" data-option="B">
+                    <span class="option-letter">B</span>
+                    <span class="option-text"></span>
+                </div>
+                <div class="option" data-option="C">
+                    <span class="option-letter">C</span>
+                    <span class="option-text"></span>
+                </div>
+                <div class="option" data-option="D">
+                    <span class="option-letter">D</span>
+                    <span class="option-text"></span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function setupQuizOptions() {
     const options = document.querySelectorAll('.option');
     options.forEach(option => {
         option.addEventListener('click', () => {
-            // Remover seleção anterior
             options.forEach(opt => opt.classList.remove('selected'));
-
-            // Selecionar nova opção
             option.classList.add('selected');
-
-            // Salvar resposta
+            
             const selectedIndex = Array.from(option.parentNode.children).indexOf(option);
             userAnswers[currentQuestion - 1] = selectedIndex;
         });
     });
 }
 
-// Carregar questão atual
 function loadCurrentQuestion() {
     if (currentQuestions.length === 0) return;
 
     const question = currentQuestions[currentQuestion - 1];
-
-    document.getElementById('question-text').textContent = question.question;
+    const questionTextEl = document.getElementById('question-text');
+    
+    if (questionTextEl) {
+        questionTextEl.textContent = question.question;
+    }
 
     const optionElements = document.querySelectorAll('.option');
     optionElements.forEach((option, index) => {
         if (question.options[index]) {
-            option.querySelector('.option-text').textContent = question.options[index];
+            const optionText = option.querySelector('.option-text');
+            if (optionText) {
+                optionText.textContent = question.options[index];
+            }
             option.style.display = 'flex';
             option.classList.remove('selected', 'correct', 'incorrect');
         } else {
@@ -434,97 +447,111 @@ function loadCurrentQuestion() {
         }
     });
 
-    // Restaurar seleção anterior se houver
     if (userAnswers[currentQuestion - 1] !== undefined) {
-        optionElements[userAnswers[currentQuestion - 1]].classList.add('selected');
+        optionElements[userAnswers[currentQuestion - 1]]?.classList.add('selected');
     }
 }
 
-// Finalizar questionário com processamento no backend
 async function finishQuiz() {
     clearInterval(timerInterval);
+    showSection('results');
 
-    try {
-        showSection('results');
+    const resultsContent = document.querySelector('.results-content');
+    if (resultsContent) {
+        showLoadingResults(resultsContent);
 
-        // Mostrar loading nos resultados
-        const resultsContent = document.querySelector('.results-content');
-        const loadingDiv = document.createElement('div');
-        loadingDiv.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 20px;"></i>
-                <p>Analisando suas respostas com IA...</p>
-                <p style="font-size: 0.9rem; color: #666;">Gerando recomendações personalizadas</p>
-            </div>
-        `;
-
-        resultsContent.style.display = 'none';
-        resultsContent.parentNode.appendChild(loadingDiv);
-
-        // Enviar respostas para o backend processar
-        const response = await authenticatedFetch(`${API_BASE_URL}/submit-quiz`, {
-            method: 'POST',
-            body: JSON.stringify({
-                subject: currentSubject,
-                answers: userAnswers.filter(answer => answer !== undefined),
-                questionsData: currentQuestions
-            })
-        });
-
-        if (!response) return;
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // Remover loading
-            loadingDiv.remove();
-            resultsContent.style.display = 'block';
-
-            // Atualizar elementos de resultado
-            document.getElementById('score-percent').textContent = `${data.accuracy}%`;
-            document.getElementById('correct-answers').textContent = data.correctAnswers;
-            document.getElementById('incorrect-answers').textContent =
-                data.totalQuestions - data.correctAnswers;
-
-            // Calcular tempo gasto
-            const timeSpent = 900 - timeLeft;
-            const minutesSpent = Math.floor(timeSpent / 60);
-            const secondsSpent = timeSpent % 60;
-            document.getElementById('time-spent').textContent =
-                `${minutesSpent.toString().padStart(2, '0')}:${secondsSpent.toString().padStart(2, '0')}`;
-
-            // Atualizar recomendações (vindas do Gemini)
-            const recommendationsList = document.querySelector('.recommendations-list');
-            recommendationsList.innerHTML = '';
-            data.recommendations.forEach(rec => {
-                const div = document.createElement('div');
-                div.className = 'recommendation';
-                div.innerHTML = `<i class="fas fa-lightbulb"></i><p>${rec}</p>`;
-                recommendationsList.appendChild(div);
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/submit-quiz`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    subject: currentSubject,
+                    answers: userAnswers.filter(answer => answer !== undefined),
+                    questionsData: questionsData
+                })
             });
 
-            // Atualizar círculo de progresso
-            updateProgressCircle(data.accuracy);
-        } else {
-            loadingDiv.remove();
-            resultsContent.style.display = 'block';
-            alert(data.message || 'Erro ao processar resultado');
+            if (!response) return;
+
+            const data = await response.json();
+
+            if (response.ok) {
+                hideLoadingResults(resultsContent);
+                updateResults(data);
+            } else {
+                hideLoadingResults(resultsContent);
+                showNotification(data.message || 'Erro ao processar resultado', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao finalizar quiz:', error);
+            hideLoadingResults(resultsContent);
+            showNotification('Erro de conexão. Tente novamente.', 'error');
         }
-    } catch (error) {
-        console.error('Erro de conexão:', error);
-        alert('Erro de conexão. Tente novamente.');
     }
 }
 
-// Carregar ranking
+function showLoadingResults(resultsContent) {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'loading-results';
+    loadingDiv.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 20px;"></i>
+            <p>Analisando suas respostas...</p>
+            <p style="font-size: 0.9rem; color: #666;">Gerando recomendações</p>
+        </div>
+    `;
+    
+    resultsContent.style.display = 'none';
+    resultsContent.parentNode.appendChild(loadingDiv);
+}
+
+function hideLoadingResults(resultsContent) {
+    const loadingDiv = document.getElementById('loading-results');
+    if (loadingDiv) {
+        loadingDiv.remove();
+    }
+    resultsContent.style.display = 'block';
+}
+
+function updateResults(data) {
+    const scorePercentEl = document.getElementById('score-percent');
+    const correctAnswersEl = document.getElementById('correct-answers');
+    const incorrectAnswersEl = document.getElementById('incorrect-answers');
+    const timeSpentEl = document.getElementById('time-spent');
+
+    if (scorePercentEl) scorePercentEl.textContent = `${data.accuracy}%`;
+    if (correctAnswersEl) correctAnswersEl.textContent = data.correctAnswers;
+    if (incorrectAnswersEl) incorrectAnswersEl.textContent = data.totalQuestions - data.correctAnswers;
+
+    const timeSpent = 900 - timeLeft;
+    const minutesSpent = Math.floor(timeSpent / 60);
+    const secondsSpent = timeSpent % 60;
+    if (timeSpentEl) {
+        timeSpentEl.textContent = `${minutesSpent.toString().padStart(2, '0')}:${secondsSpent.toString().padStart(2, '0')}`;
+    }
+
+    updateRecommendations(data.recommendations);
+    updateProgressCircle(data.accuracy);
+}
+
+function updateRecommendations(recommendations) {
+    const recommendationsList = document.querySelector('.recommendations-list');
+    if (!recommendationsList) return;
+
+    recommendationsList.innerHTML = '';
+    recommendations.forEach(rec => {
+        const div = document.createElement('div');
+        div.className = 'recommendation';
+        div.innerHTML = `<i class="fas fa-lightbulb"></i><p>${rec}</p>`;
+        recommendationsList.appendChild(div);
+    });
+}
+
 async function loadRanking() {
     try {
         const response = await authenticatedFetch(`${API_BASE_URL}/ranking`);
-
         if (!response) return;
 
         const data = await response.json();
-
         if (response.ok) {
             updateRankingDisplay(data.ranking);
         }
@@ -533,9 +560,10 @@ async function loadRanking() {
     }
 }
 
-// Atualizar display do ranking
 function updateRankingDisplay(ranking) {
     const rankingList = document.querySelector('.ranking-list');
+    if (!rankingList) return;
+
     rankingList.innerHTML = '';
 
     ranking.slice(0, 10).forEach((user, index) => {
@@ -560,19 +588,18 @@ function updateRankingDisplay(ranking) {
     });
 }
 
-// Atualizar círculo de progresso
 function updateProgressCircle(percentage) {
     const circle = document.querySelector('.progress-ring-circle.fill');
-    if (circle) {
-        const radius = circle.r.baseVal.value;
-        const circumference = 2 * Math.PI * radius;
-        const offset = circumference - (percentage / 100) * circumference;
-        circle.style.strokeDasharray = `${circumference} ${circumference}`;
-        circle.style.strokeDashoffset = offset;
-    }
+    if (!circle) return;
+
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+    
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = offset;
 }
 
-// Iniciar timer
 function startTimer() {
     clearInterval(timerInterval);
     timeLeft = 900;
@@ -583,7 +610,9 @@ function startTimer() {
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
 
-        timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        if (timer) {
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
@@ -592,32 +621,41 @@ function startTimer() {
     }, 1000);
 }
 
-// Atualizar progresso da questão
 function updateQuestionProgress() {
-    document.getElementById('current-question').textContent = currentQuestion;
-    document.getElementById('total-questions').textContent = totalQuestions;
-    const progressPercent = (currentQuestion / totalQuestions) * 100;
-    progressFill.style.width = `${progressPercent}%`;
+    const currentQuestionEl = document.getElementById('current-question');
+    const totalQuestionsEl = document.getElementById('total-questions');
+    
+    if (currentQuestionEl) currentQuestionEl.textContent = currentQuestion;
+    if (totalQuestionsEl) totalQuestionsEl.textContent = totalQuestions;
+    
+    if (progressFill) {
+        const progressPercent = (currentQuestion / totalQuestions) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+    }
 }
 
-// Configurar botões de ação
 function setupActionButtons() {
-    startJourneyBtn.addEventListener('click', () => {
-        showSection('subjects');
-    });
+    if (startJourneyBtn) {
+        startJourneyBtn.addEventListener('click', () => {
+            showSection('subjects');
+        });
+    }
 
-    backToSubjectsBtn.addEventListener('click', () => {
-        resetQuiz();
-        showSection('subjects');
-    });
+    if (backToSubjectsBtn) {
+        backToSubjectsBtn.addEventListener('click', () => {
+            resetQuiz();
+            showSection('subjects');
+        });
+    }
 
-    tryAgainBtn.addEventListener('click', () => {
-        resetQuiz();
-        loadQuestions();
-    });
+    if (tryAgainBtn) {
+        tryAgainBtn.addEventListener('click', () => {
+            resetQuiz();
+            loadQuestions();
+        });
+    }
 }
 
-// Reiniciar questionário
 function resetQuiz() {
     currentQuestion = 1;
     score = 0;
@@ -630,7 +668,35 @@ function resetQuiz() {
     updateQuestionProgress();
 }
 
-// Capitalizar primeira letra
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+function showNotification(message, type = 'info') {
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button class="notification-close">&times;</button>
+    `;
+
+    document.body.appendChild(notification);
+
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+        notification.remove();
+    });
+
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+window.loadQuestions = loadQuestions;
