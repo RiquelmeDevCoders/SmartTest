@@ -37,7 +37,23 @@ const tryAgainBtn = document.getElementById('try-again');
 
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
+    
+    if (tryAgainBtn) {
+        tryAgainBtn.addEventListener('click', function() {
+            restartCurrentQuiz();
+        });
+    }
 });
+
+function restartCurrentQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    selectedAnswers = [];
+    
+    showSection('quiz');
+    
+    startQuiz(currentSubject);
+}
 
 function initializeApp() {
     authToken = localStorage.getItem('authToken');
