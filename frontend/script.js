@@ -47,15 +47,14 @@ function initializeApp() {
     setupQuiz();
     setupActionButtons();
     
-    // Inicializar perfil primeiro
     if (authToken) {
         updateAuthUI(true);
-        // Carregar dados do usuário
+        
         loadUserProfile().then(() => {
             loadRanking();
         });
     } else {
-        // Limpar perfil se não estiver logado
+        
         clearProfileDisplay();
     }
 }
@@ -163,31 +162,26 @@ function updateProfileDisplay() {
         return;
     }
 
-    // Atualizar nome do usuário
     const userNameEl = document.getElementById('user-name');
     if (userNameEl) {
         userNameEl.textContent = currentUser.name || 'Nome não disponível';
     }
 
-    // Atualizar email do usuário
     const userEmailEl = document.getElementById('user-email');
     if (userEmailEl) {
         userEmailEl.textContent = currentUser.email || 'Email não disponível';
     }
 
-    // Atualizar pontos do usuário
     const userPointsEl = document.getElementById('user-points');
     if (userPointsEl) {
         userPointsEl.textContent = `${currentUser.points || 0} pontos`;
     }
 
-    // Atualizar avatar (primeira letra do nome)
     const userAvatarEl = document.getElementById('user-avatar');
     if (userAvatarEl && currentUser.name) {
         userAvatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
     }
 
-    // Atualizar data de cadastro se existir
     const memberSinceEl = document.getElementById('member-since');
     if (memberSinceEl && currentUser.createdAt) {
         try {
@@ -347,7 +341,7 @@ async function handleLogin(e) {
             showNotification('Login realizado com sucesso!', 'success');
             document.getElementById('loginForm').reset();
             
-            // Carregar perfil após login bem-sucedido
+            
             await loadUserProfile();
         } else {
             showNotification(data.message || 'Erro ao fazer login', 'error');
@@ -416,7 +410,7 @@ async function handleRegister(e) {
             showNotification('Conta criada com sucesso!', 'success');
             document.getElementById('registerForm').reset();
             
-            // Carregar perfil após cadastro bem-sucedido
+            
             await loadUserProfile();
         } else {
             showNotification(data.message || 'Erro ao criar conta', 'error');
@@ -824,7 +818,6 @@ function showNotification(message, type = 'info') {
         existingNotification.remove();
     }
 
-    // Criar nova notificação
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
@@ -832,7 +825,6 @@ function showNotification(message, type = 'info') {
         <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
     `;
 
-    // Adicionar estilos inline se não existirem
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -851,7 +843,6 @@ function showNotification(message, type = 'info') {
         animation: slideIn 0.3s ease-out;
     `;
 
-    // Definir cores baseadas no tipo
     const colors = {
         'success': '#4CAF50',
         'error': '#f44336',
@@ -861,7 +852,6 @@ function showNotification(message, type = 'info') {
     
     notification.style.backgroundColor = colors[type] || colors.info;
 
-    // Estilizar botão de fechar
     const closeBtn = notification.querySelector('.notification-close');
     closeBtn.style.cssText = `
         background: none;
@@ -879,7 +869,6 @@ function showNotification(message, type = 'info') {
 
     document.body.appendChild(notification);
 
-    // Auto-remover após 5 segundos
     setTimeout(() => {
         if (notification.parentNode) {
             notification.style.animation = 'slideOut 0.3s ease-in';
@@ -887,7 +876,6 @@ function showNotification(message, type = 'info') {
         }
     }, 5000);
 
-    // Adicionar animações CSS se não existirem
     if (!document.querySelector('#notification-styles')) {
         const style = document.createElement('style');
         style.id = 'notification-styles';
