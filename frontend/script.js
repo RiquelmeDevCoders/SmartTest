@@ -11,6 +11,7 @@ let currentQuestions = [];
 let userAnswers = [];
 let questionsData = [];
 let authToken = null;
+let currentUser = null;
 
 const API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000/api'
@@ -48,6 +49,7 @@ function initializeApp() {
     
     if (authToken) {
         updateAuthUI(true);
+        loadUserProfile();
         loadRanking();
     }
 }
@@ -56,6 +58,10 @@ function updateAuthUI(isLoggedIn) {
     if (loginBtn && registerBtn) {
         loginBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
         registerBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
+    }
+    
+    if (isLoggedIn && currentUser) {
+        updateProfileDisplay();
     }
 }
 
@@ -95,7 +101,9 @@ async function authenticatedFetch(url, options = {}) {
 function handleAuthError() {
     localStorage.removeItem('authToken');
     authToken = null;
+    currentUser = null;
     updateAuthUI(false);
+    clearProfileDisplay();
     showNotification('Sessão expirada. Faça login novamente.', 'error');
 }
 
@@ -113,6 +121,74 @@ function setupNavigation() {
 
             showSection(sectionId);
         });
+    });
+}
+
+async function loadUserProfile() {
+    try {
+        const response = await authenticatedFetch(`${API_BASE_URL}/profile`);
+        if (!response) return;
+
+        const data = await response.json();
+        if (response.ok) {
+            currentUser = data.user;
+            updateProfileDisplay();
+        }
+    } catch (error) {
+        console.error('Erro ao carregar perfil:', error);
+    }
+}
+
+function updateProfileDisplay() {
+    if (!currentUser) return;
+
+    // Atualizar nome do usuário
+    const userNameEl = document.getElementById('user-name');
+    if (userNameEl) {
+        userNameEl.textContent = currentUser.name;
+    }
+
+    // Atualizar email do usuário
+    const userEmailEl = document.getElementById('user-email');
+    if (userEmailEl) {
+        userEmailEl.textContent = currentUser.email;
+    }
+
+    // Atualizar pontos do usuário
+    const userPointsEl = document.getElementById('user-points');
+    if (userPointsEl) {
+        userPointsEl.textContent = `${currentUser.points} pontos`;
+    }
+
+    // Atualizar avatar (primeira letra do nome)
+    const userAvatarEl = document.getElementById('user-avatar');
+    if (userAvatarEl) {
+        userAvatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
+    }
+
+    // Atualizar data de cadastro se existir
+    const memberSinceEl = document.getElementById('member-since');
+    if (memberSinceEl && currentUser.createdAt) {
+        const date = new Date(currentUser.createdAt);
+        const formattedDate = date.toLocaleDateString('pt-BR');
+        memberSinceEl.textContent = `Membro desde ${formattedDate}`;
+    }
+}
+
+function clearProfileDisplay() {
+    const elements = [
+        'user-name',
+        'user-email', 
+        'user-points',
+        'user-avatar',
+        'member-since'
+    ];
+
+    elements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = '';
+        }
     });
 }
 
@@ -139,6 +215,8 @@ function showSection(sectionId) {
         startTimer();
     } else if (sectionId === 'ranking') {
         loadRanking();
+    } else if (sectionId === 'profile') {
+        loadUserProfile();
     }
 }
 
@@ -225,6 +303,7 @@ async function handleLogin(e) {
 
         if (response.ok) {
             authToken = data.token;
+            currentUser = data.user;
             localStorage.setItem('authToken', authToken);
             updateAuthUI(true);
             if (loginModal) loginModal.classList.remove('show');
@@ -273,6 +352,7 @@ async function handleRegister(e) {
 
         if (response.ok) {
             authToken = data.token;
+            currentUser = data.user;
             localStorage.setItem('authToken', authToken);
             updateAuthUI(true);
             if (registerModal) registerModal.classList.remove('show');

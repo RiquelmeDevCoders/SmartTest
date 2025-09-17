@@ -812,6 +812,30 @@ app.get('/api/subjects', (req, res) => {
     });
 });
 
+app.get('/api/profile', authenticateToken, (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = users.find(u => u.id === userId);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        res.json({
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                points: user.points || 0,
+                createdAt: user.createdAt
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao buscar perfil:', error);
+        res.status(500).json({ message: 'Erro ao buscar dados do perfil' });
+    }
+});
+
 app.get('/', (req, res) => {
     res.json({ 
         message: 'SmartTest API',
