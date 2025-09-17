@@ -23,12 +23,22 @@ app.use(cors({
 // Middleware para preflight requests
 app.options('*', cors());
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Inicializar Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+let genAI, model;
+try {
+    if (!process.env.GEMINI_API_KEY) {
+        console.warn('⚠️  GEMINI_API_KEY não encontrada. O modo de demonstração será usado.');
+    } else {
+        genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        console.log('✅ Gemini AI inicializado com sucesso');
+    }
+} catch (error) {
+    console.error('❌ Erro ao inicializar Gemini:', error);
+}
 
 // Simulação de banco de dados em memória
 let users = [];
@@ -75,16 +85,20 @@ const subjectMap = {
 // Função para gerar questões com Gemini
 async function generateQuestionsWithGemini(subject, difficulty, count) {
     try {
+        if (!model) {
+            throw new Error('Gemini API não configurada');
+        }
+
         const subjectInEnglish = subjectMap[subject.toLowerCase()] || subject;
         const difficultyText = {
             'easy': 'básico/fácil',
             'medium': 'intermediário/médio',
             'hard': 'avançado/difícil'
-        };
+        }[difficulty] || 'intermediário/médio';
 
         const prompt = `Gere ${count} questões de múltipla escolha sobre ${subject} em português brasileiro.
         
-Nível de dificuldade: ${difficultyText[difficulty] || 'médio'}
+Nível de dificuldade: ${difficultyText}
 
 Formato EXATO para cada questão:
 QUESTAO 1:
@@ -113,14 +127,16 @@ Requisitos:
 Disciplina: ${subject}
 Número de questões: ${count}`;
 
+        console.log('📝 Gerando questões com Gemini...');
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
+        console.log('✅ Resposta do Gemini recebida');
         return parseGeminiResponse(text);
     } catch (error) {
-        console.error('Erro ao gerar questões com Gemini:', error);
-        throw error;
+        console.error('❌ Erro ao gerar questões com Gemini:', error);
+        throw new Error(`Falha ao gerar questões: ${error.message}`);
     }
 }
 
@@ -140,11 +156,11 @@ function parseGeminiResponse(text) {
             const question = questionMatch[1].trim();
             
             // Extrair alternativas
-            const optionsRegex = /([A-D])\)\s*(.+?)(?=\n[A-D]\)|\nCORRETA:|$)/gs;
             const options = [];
+            const optionRegex = /([A-D])\)\s*(.+?)(?=\n[A-D]\)|\nCORRETA:|$)/gs;
             let match;
             
-            while ((match = optionsRegex.exec(block)) !== null) {
+            while ((match = optionRegex.exec(block)) !== null) {
                 options.push(match[2].trim());
             }
             
@@ -162,18 +178,79 @@ function parseGeminiResponse(text) {
                 difficulty: 'medium'
             });
         } catch (error) {
-            console.error('Erro ao parsear questão:', error);
+            console.error('❌ Erro ao parsear questão:', error);
             continue;
         }
+    }
+    
+    if (questions.length === 0) {
+        throw new Error('Nenhuma questão válida encontrada na resposta do Gemini');
     }
     
     return questions;
 }
 
+// Questões de fallback para quando o Gemini falhar
+const fallbackQuestions = {
+    matematica: [
+        {
+            question: "Qual é a derivada de f(x) = x² + 3x + 2?",
+            options: [
+                "2x + 3",
+                "x² + 3",
+                "2x + 2",
+                "x + 3"
+            ],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é o resultado de ∫(2x dx) de 0 a 3?",
+            options: [
+                "9",
+                "6",
+                "12",
+                "18"
+            ],
+            correctAnswer: 0,
+            difficulty: "medium"
+        }
+    ],
+    portugues: [
+        {
+            question: "Qual é a classificação morfológica da palavra 'correndo'?",
+            options: [
+                "Verbo",
+                "Adjetivo",
+                "Advérbio",
+                "Substantivo"
+            ],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual figura de linguagem está presente em 'O tempo é um rio que flui'?",
+            options: [
+                "Metáfora",
+                "Comparação",
+                "Hipérbole",
+                "Personificação"
+            ],
+            correctAnswer: 0,
+            difficulty: "medium"
+        }
+    ]
+};
+
 // Rotas de autenticação
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
+
+        // Validação básica
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+        }
 
         const existingUser = users.find(user => user.email === email);
         if (existingUser) {
@@ -210,6 +287,7 @@ app.post('/api/register', async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('❌ Erro no registro:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });
     }
 });
@@ -217,6 +295,11 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // Validação básica
+        if (!email || !password) {
+            return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
+        }
 
         const user = users.find(user => user.email === email);
         if (!user) {
@@ -245,11 +328,12 @@ app.post('/api/login', async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('❌ Erro no login:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });
     }
 });
 
-// Rota para gerar questões com Gemini
+// Rota para gerar questões
 app.post('/api/generate-questions', authenticateToken, async (req, res) => {
     try {
         const { subject, difficulty = 'medium', count = 5 } = req.body;
@@ -259,47 +343,28 @@ app.post('/api/generate-questions', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'Disciplina não encontrada' });
         }
 
-        // Chave para cache
-        const cacheKey = `${subject}_${difficulty}_${count}`;
-        
-        // Verificar cache (válido por 1 hora)
-        if (questionsCache[cacheKey] && questionsCache[cacheKey].timestamp > Date.now() - 3600000) {
-            const cachedQuestions = questionsCache[cacheKey].questions;
-            
-            // Embaralhar questões do cache
-            const shuffled = [...cachedQuestions].sort(() => Math.random() - 0.5);
-            const selectedQuestions = shuffled.slice(0, count);
-            
-            const questionsForClient = selectedQuestions.map((q, index) => ({
-                id: index + 1,
-                question: q.question,
-                options: q.options,
-                difficulty: q.difficulty
-            }));
+        console.log(`📚 Gerando ${count} questões de ${subject} (dificuldade: ${difficulty})`);
 
-            return res.json({
-                questions: questionsForClient,
-                total: questionsForClient.length,
-                subject: subject,
-                source: 'cache'
-            });
+        let questions = [];
+
+        // Tentar usar o Gemini se estiver disponível
+        if (model) {
+            try {
+                questions = await generateQuestionsWithGemini(subject, difficulty, count);
+                console.log(`✅ ${questions.length} questões geradas pelo Gemini`);
+            } catch (geminiError) {
+                console.warn('⚠️  Gemini falhou, usando questões de fallback:', geminiError.message);
+            }
         }
 
-        // Gerar novas questões com Gemini
-        const generatedQuestions = await generateQuestionsWithGemini(subject, difficulty, Math.min(count, 10));
-        
-        if (generatedQuestions.length === 0) {
-            return res.status(500).json({ message: 'Erro ao gerar questões. Tente novamente.' });
+        // Se o Gemini falhou ou não está disponível, usar questões de fallback
+        if (questions.length === 0) {
+            questions = fallbackQuestions[subject] || fallbackQuestions.matematica;
+            console.log(`📋 Usando ${questions.length} questões de fallback`);
         }
 
-        // Salvar no cache
-        questionsCache[cacheKey] = {
-            questions: generatedQuestions,
-            timestamp: Date.now()
-        };
-
-        // Selecionar questões solicitadas
-        const selectedQuestions = generatedQuestions.slice(0, count);
+        // Limitar ao número solicitado
+        const selectedQuestions = questions.slice(0, count);
         
         const questionsForClient = selectedQuestions.map((q, index) => ({
             id: index + 1,
@@ -312,12 +377,15 @@ app.post('/api/generate-questions', authenticateToken, async (req, res) => {
             questions: questionsForClient,
             total: questionsForClient.length,
             subject: subject,
-            source: 'gemini'
+            source: model ? 'gemini' : 'fallback'
         });
 
     } catch (error) {
-        console.error('Erro ao gerar questões:', error);
-        res.status(500).json({ message: 'Erro ao gerar questões. Tente novamente.' });
+        console.error('❌ Erro ao gerar questões:', error);
+        res.status(500).json({ 
+            message: 'Erro ao gerar questões. Tente novamente.',
+            error: error.message
+        });
     }
 });
 
@@ -372,86 +440,27 @@ app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
             accuracy: accuracy,
             points: totalPoints,
             results: results,
-            recommendations: await generateRecommendationsWithGemini(subject, accuracy)
+            recommendations: [
+                "Continue praticando regularmente",
+                "Revise os tópicos com maior dificuldade",
+                "Faça exercícios complementares"
+            ]
         });
     } catch (error) {
-        console.error('Erro ao processar respostas:', error);
+        console.error('❌ Erro ao processar respostas:', error);
         res.status(500).json({ message: 'Erro ao processar respostas' });
     }
 });
 
-// Função para gerar recomendações com Gemini
-async function generateRecommendationsWithGemini(subject, accuracy) {
-    try {
-        const performanceLevel = accuracy < 50 ? 'baixo' : accuracy < 80 ? 'médio' : 'alto';
-        
-        const prompt = `Com base no desempenho ${performanceLevel} (${accuracy}% de acertos) em ${subject}, gere 3 recomendações específicas de estudo.
-
-Formato:
-- [recomendação 1]
-- [recomendação 2]  
-- [recomendação 3]
-
-Requisitos:
-- Recomendações práticas e específicas
-- Adequadas ao nível de desempenho
-- Linguagem motivacional e construtiva
-- Foco em melhorar os pontos fracos`;
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-        
-        // Extrair recomendações
-        const recommendations = text.split('\n')
-            .filter(line => line.trim().startsWith('-'))
-            .map(line => line.replace('-', '').trim())
-            .slice(0, 3);
-            
-        return recommendations.length > 0 ? recommendations : getDefaultRecommendations(subject, accuracy);
-    } catch (error) {
-        console.error('Erro ao gerar recomendações:', error);
-        return getDefaultRecommendations(subject, accuracy);
-    }
-}
-
-// Função de fallback para recomendações
-function getDefaultRecommendations(subject, accuracy) {
-    const recommendations = {
-        matematica: {
-            low: ["Revise conceitos básicos de álgebra", "Pratique operações fundamentais", "Estude geometria plana"],
-            medium: ["Revise derivadas de funções polinomiais", "Pratique mais exercícios de cálculo diferencial", "Estude as regras de derivação"],
-            high: ["Explore tópicos avançados de cálculo", "Pratique problemas de aplicação", "Estude integrais definidas"]
-        },
-        portugues: {
-            low: ["Revise regras básicas de gramática", "Pratique concordância verbal e nominal", "Estude classes de palavras"],
-            medium: ["Pratique análise sintática", "Estude figuras de linguagem", "Revise regência verbal e nominal"],
-            high: ["Aprofunde-se em literatura brasileira", "Pratique redação e dissertação", "Estude estilística e semântica"]
-        }
-    };
-
-    const level = accuracy < 50 ? 'low' : accuracy < 80 ? 'medium' : 'high';
-    return recommendations[subject]?.[level] || [
-        "Continue praticando regularmente",
-        "Revise os tópicos com maior dificuldade",
-        "Busque exercícios complementares"
-    ];
-}
-
 // Rotas restantes
 app.get('/api/ranking', (req, res) => {
     try {
-        const { period = 'global' } = req.query;
-        
-        const allUsers = [...rankings];
-        users.forEach(user => {
-            allUsers.push({
-                id: user.id,
-                name: user.name,
-                points: user.points,
-                avatar: user.name.charAt(0).toUpperCase()
-            });
-        });
+        const allUsers = [...rankings, ...users.map(user => ({
+            id: user.id,
+            name: user.name,
+            points: user.points,
+            avatar: user.name.charAt(0).toUpperCase()
+        }))];
 
         const sortedRanking = allUsers.sort((a, b) => b.points - a.points);
         
@@ -462,9 +471,10 @@ app.get('/api/ranking', (req, res) => {
 
         res.json({
             ranking: rankingWithPosition.slice(0, 20),
-            period: period
+            period: 'global'
         });
     } catch (error) {
+        console.error('❌ Erro ao obter ranking:', error);
         res.status(500).json({ message: 'Erro ao obter ranking' });
     }
 });
@@ -486,6 +496,7 @@ app.get('/api/profile', authenticateToken, (req, res) => {
             createdAt: user.createdAt
         });
     } catch (error) {
+        console.error('❌ Erro ao obter perfil:', error);
         res.status(500).json({ message: 'Erro ao obter perfil' });
     }
 });
@@ -495,18 +506,28 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
         message: 'Server is running',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        gemini: !!model
     });
 });
 
-// Rota padrão - removida pois o frontend está no Netlify
+// Rota padrão
 app.get('/', (req, res) => {
-    res.redirect(FRONTEND_URL);
+    res.json({ 
+        message: 'SmartTest API',
+        version: '1.0.0',
+        endpoints: {
+            login: '/api/login',
+            register: '/api/register',
+            questions: '/api/generate-questions',
+            ranking: '/api/ranking'
+        }
+    });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('❌ Erro não tratado:', err.stack);
     res.status(500).json({ message: 'Erro interno do servidor' });
 });
 
@@ -519,4 +540,5 @@ app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Frontend: ${FRONTEND_URL}`);
     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🤖 Gemini: ${model ? '✅ Configurado' : '❌ Não configurado'}`);
 });
