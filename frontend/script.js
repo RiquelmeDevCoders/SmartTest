@@ -13,10 +13,10 @@ let userAnswers = []; // Para armazenar as respostas do usuário
 let questionsData = []; // Para armazenar dados das questões incluindo respostas corretas
 let authToken = localStorage.getItem('authToken'); // Token de autenticação
 
-// Base URL da API - ALTERE ESTA URL APÓS O DEPLOY NO RENDER
+// Base URL da API - CORRIGIDA para incluir /api
 const API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000/api'
-    : 'https://smarttest-1.onrender.com';
+    : 'https://smarttest-1.onrender.com/api'; // ← ADICIONADO /api NO FINAL
 
 // Elementos DOM
 const sections = document.querySelectorAll('.section');
@@ -36,6 +36,11 @@ const goToLogin = document.getElementById('goToLogin');
 const startJourneyBtn = document.getElementById('startJourney');
 const backToSubjectsBtn = document.getElementById('back-to-subjects');
 const tryAgainBtn = document.getElementById('try-again');
+
+// Debug: Verificar URLs
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('Login URL:', `${API_BASE_URL}/login`);
+console.log('Register URL:', `${API_BASE_URL}/register`);
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function () {
@@ -65,7 +70,6 @@ function updateAuthUI(isLoggedIn) {
 
 console.log("Token salvo:", authToken);
 
-
 // Função para fazer requisições autenticadas
 async function authenticatedFetch(url, options = {}) {
     const config = {
@@ -77,7 +81,6 @@ async function authenticatedFetch(url, options = {}) {
     };
 
     console.log("➡️ Chamando:", url, "com headers", options.headers);
-
 
     if (authToken) {
         config.headers.Authorization = `Bearer ${authToken}`;
@@ -195,6 +198,12 @@ function setupModals() {
                 body: JSON.stringify({ email, password })
             });
 
+            // Verificar se a resposta é JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta do servidor não é JSON');
+            }
+
             const data = await response.json();
 
             if (response.ok) {
@@ -207,7 +216,8 @@ function setupModals() {
                 alert(data.message || 'Erro ao fazer login');
             }
         } catch (error) {
-            alert('Erro de conexão. Tente novamente.');
+            console.error('Erro no login:', error);
+            alert('Erro de conexão. Verifique o console para mais detalhes.');
         }
     });
 
@@ -234,6 +244,12 @@ function setupModals() {
                 body: JSON.stringify({ name, email, password })
             });
 
+            // Verificar se a resposta é JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta do servidor não é JSON');
+            }
+
             const data = await response.json();
 
             if (response.ok) {
@@ -246,7 +262,8 @@ function setupModals() {
                 alert(data.message || 'Erro ao criar conta');
             }
         } catch (error) {
-            alert('Erro de conexão. Tente novamente.');
+            console.error('Erro no registro:', error);
+            alert('Erro de conexão. Verifique o console para mais detalhes.');
         }
     });
 }
@@ -307,7 +324,7 @@ async function loadQuestions() {
             body: JSON.stringify({
                 subject: currentSubject,
                 difficulty: 'medium',
-                count: 5 // Reduzido para economizar API do Gemini
+                count: 5
             })
         });
 
@@ -352,13 +369,12 @@ async function loadQuestions() {
             updateQuestionProgress();
             loadCurrentQuestion();
 
-            // Log informativo
             console.log(`Questões ${data.source === 'gemini' ? 'geradas pela IA Gemini' : 'carregadas do cache'}`);
         } else {
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff6b6b; margin-bottom: 20px;"></i>
-                    <p>Erro ao gerar questões</p>
+                    <p>Erro ao gerar questões: ${data.message || 'Erro desconhecido'}</p>
                     <button onclick="loadQuestions()" class="btn btn-primary" style="margin-top: 20px;">Tentar Novamente</button>
                 </div>
             `;
@@ -369,7 +385,7 @@ async function loadQuestions() {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px;">
                 <i class="fas fa-wifi" style="font-size: 2rem; color: #ff6b6b; margin-bottom: 20px;"></i>
-                <p>Erro de conexão</p>
+                <p>Erro de conexão: ${error.message}</p>
                 <button onclick="loadQuestions()" class="btn btn-primary" style="margin-top: 20px;">Tentar Novamente</button>
             </div>
         `;
@@ -446,7 +462,7 @@ async function finishQuiz() {
             body: JSON.stringify({
                 subject: currentSubject,
                 answers: userAnswers.filter(answer => answer !== undefined),
-                questionsData: currentQuestions // O backend vai simular as respostas corretas
+                questionsData: currentQuestions
             })
         });
 
