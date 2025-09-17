@@ -70,7 +70,7 @@ function updateAuthUI(isLoggedIn) {
 
 console.log("Token salvo:", authToken);
 
-// Função para fazer requisições autenticadas
+// Função para fazer requisições autenticadas - CORRIGIDA
 async function authenticatedFetch(url, options = {}) {
     const config = {
         ...options,
@@ -80,24 +80,29 @@ async function authenticatedFetch(url, options = {}) {
         }
     };
 
-    console.log("➡️ Chamando:", url, "com headers", options.headers);
+    console.log("➡️ Chamando:", url, "com headers", config.headers); // ← CORRIGIDO: options.headers → config.headers
 
     if (authToken) {
         config.headers.Authorization = `Bearer ${authToken}`;
     }
 
-    const response = await fetch(url, config);
+    try {
+        const response = await fetch(url, config);
 
-    if (response.status === 401) {
-        // Token expirado, remover e redirecionar para login
-        localStorage.removeItem('authToken');
-        authToken = null;
-        updateAuthUI(false);
-        alert('Sessão expirada. Faça login novamente.');
-        return null;
+        if (response.status === 401) {
+            // Token expirado, remover e redirecionar para login
+            localStorage.removeItem('authToken');
+            authToken = null;
+            updateAuthUI(false);
+            alert('Sessão expirada. Faça login novamente.');
+            return null;
+        }
+
+        return response;
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        throw error;
     }
-
-    return response;
 }
 
 // Configuração da navegação
@@ -355,7 +360,7 @@ async function loadQuestions() {
                             <span class="option-letter">C</span>
                             <span class="option-text"></span>
                         </div>
-                        <div class="option" data-option="D">
+                        <div class='option' data-option="D">
                             <span class="option-letter">D</span>
                             <span class="option-text"></span>
                         </div>
