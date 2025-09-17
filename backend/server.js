@@ -3,24 +3,36 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'smarttest-secret-key';
 
-// Configurar CORS para aceitar requests do Netlify
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://smarttestai.netlify.app';
+// Configurar CORS de forma mais permissiva
+const allowedOrigins = [
+    'https://smarttestai.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:8000'
+];
 
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: function (origin, callback) {
+        // Permitir requisições sem origin (como mobile apps ou curl)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
 }));
 
-// Middleware para preflight requests
+// Middleware para lidar com preflight requests
 app.options('*', cors());
 
 app.use(express.json({ limit: '10mb' }));
@@ -49,7 +61,7 @@ let rankings = [
     { id: 4, name: 'Pedro Costa', points: 1980, avatar: 'P' }
 ];
 
-// Cache para questões geradas (evitar muitas chamadas à API)
+// Cache para questões geradas
 let questionsCache = {};
 
 // Middleware de autenticação
@@ -70,7 +82,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Mapa de disciplinas em português para inglês
+// Mapa de disciplinas
 const subjectMap = {
     'matematica': 'mathematics',
     'portugues': 'portuguese language',
@@ -89,7 +101,6 @@ async function generateQuestionsWithGemini(subject, difficulty, count) {
             throw new Error('Gemini API não configurada');
         }
 
-        const subjectInEnglish = subjectMap[subject.toLowerCase()] || subject;
         const difficultyText = {
             'easy': 'básico/fácil',
             'medium': 'intermediário/médio',
@@ -109,30 +120,17 @@ C) [alternativa C]
 D) [alternativa D]
 CORRETA: [A, B, C ou D]
 
-QUESTAO 2:
-Pergunta: [sua pergunta aqui]
-A) [alternativa A]
-B) [alternativa B]
-C) [alternativa C]
-D) [alternativa D]
-CORRETA: [A, B, C ou D]
-
 Requisitos:
 - Questões adequadas ao nível educacional brasileiro
 - Linguagem clara e objetiva
 - Apenas uma alternativa correta por questão
-- Siga EXATAMENTE o formato mostrado
-- Use o padrão QUESTAO [número]:
-
-Disciplina: ${subject}
-Número de questões: ${count}`;
+- Siga EXATAMENTE o formato mostrado`;
 
         console.log('📝 Gerando questões com Gemini...');
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
-        console.log('✅ Resposta do Gemini recebida');
         return parseGeminiResponse(text);
     } catch (error) {
         console.error('❌ Erro ao gerar questões com Gemini:', error);
@@ -149,13 +147,11 @@ function parseGeminiResponse(text) {
         try {
             const block = questionBlocks[i].trim();
             
-            // Extrair pergunta
             const questionMatch = block.match(/Pergunta:\s*(.+?)(?=\n[A-D]\))/s);
             if (!questionMatch) continue;
             
             const question = questionMatch[1].trim();
             
-            // Extrair alternativas
             const options = [];
             const optionRegex = /([A-D])\)\s*(.+?)(?=\n[A-D]\)|\nCORRETA:|$)/gs;
             let match;
@@ -164,12 +160,10 @@ function parseGeminiResponse(text) {
                 options.push(match[2].trim());
             }
             
-            // Extrair resposta correta
             const correctMatch = block.match(/CORRETA:\s*([A-D])/);
             if (!correctMatch || options.length !== 4) continue;
             
-            const correctLetter = correctMatch[1];
-            const correctIndex = correctLetter.charCodeAt(0) - 'A'.charCodeAt(0);
+            const correctIndex = correctMatch[1].charCodeAt(0) - 'A'.charCodeAt(0);
             
             questions.push({
                 question: question,
@@ -183,35 +177,15 @@ function parseGeminiResponse(text) {
         }
     }
     
-    if (questions.length === 0) {
-        throw new Error('Nenhuma questão válida encontrada na resposta do Gemini');
-    }
-    
     return questions;
 }
 
-// Questões de fallback para quando o Gemini falhar
+// Questões de fallback
 const fallbackQuestions = {
     matematica: [
         {
             question: "Qual é a derivada de f(x) = x² + 3x + 2?",
-            options: [
-                "2x + 3",
-                "x² + 3",
-                "2x + 2",
-                "x + 3"
-            ],
-            correctAnswer: 0,
-            difficulty: "medium"
-        },
-        {
-            question: "Qual é o resultado de ∫(2x dx) de 0 a 3?",
-            options: [
-                "9",
-                "6",
-                "12",
-                "18"
-            ],
+            options: ["2x + 3", "x² + 3", "2x + 2", "x + 3"],
             correctAnswer: 0,
             difficulty: "medium"
         }
@@ -219,23 +193,7 @@ const fallbackQuestions = {
     portugues: [
         {
             question: "Qual é a classificação morfológica da palavra 'correndo'?",
-            options: [
-                "Verbo",
-                "Adjetivo",
-                "Advérbio",
-                "Substantivo"
-            ],
-            correctAnswer: 0,
-            difficulty: "medium"
-        },
-        {
-            question: "Qual figura de linguagem está presente em 'O tempo é um rio que flui'?",
-            options: [
-                "Metáfora",
-                "Comparação",
-                "Hipérbole",
-                "Personificação"
-            ],
+            options: ["Verbo", "Adjetivo", "Advérbio", "Substantivo"],
             correctAnswer: 0,
             difficulty: "medium"
         }
@@ -247,7 +205,6 @@ app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Validação básica
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
         }
@@ -296,7 +253,6 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validação básica
         if (!email || !password) {
             return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
         }
@@ -336,34 +292,35 @@ app.post('/api/login', async (req, res) => {
 // Rota para gerar questões
 app.post('/api/generate-questions', authenticateToken, async (req, res) => {
     try {
+        // Configurar headers CORS manualmente
+        res.header('Access-Control-Allow-Origin', 'https://smarttestai.netlify.app');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
         const { subject, difficulty = 'medium', count = 5 } = req.body;
         
-        // Verificar se a disciplina é válida
         if (!subjectMap[subject.toLowerCase()]) {
             return res.status(400).json({ message: 'Disciplina não encontrada' });
         }
 
-        console.log(`📚 Gerando ${count} questões de ${subject} (dificuldade: ${difficulty})`);
+        console.log(`📚 Gerando ${count} questões de ${subject}`);
 
         let questions = [];
 
-        // Tentar usar o Gemini se estiver disponível
         if (model) {
             try {
                 questions = await generateQuestionsWithGemini(subject, difficulty, count);
                 console.log(`✅ ${questions.length} questões geradas pelo Gemini`);
             } catch (geminiError) {
-                console.warn('⚠️  Gemini falhou, usando questões de fallback:', geminiError.message);
+                console.warn('⚠️  Gemini falhou, usando questões de fallback');
             }
         }
 
-        // Se o Gemini falhou ou não está disponível, usar questões de fallback
         if (questions.length === 0) {
             questions = fallbackQuestions[subject] || fallbackQuestions.matematica;
             console.log(`📋 Usando ${questions.length} questões de fallback`);
         }
 
-        // Limitar ao número solicitado
         const selectedQuestions = questions.slice(0, count);
         
         const questionsForClient = selectedQuestions.map((q, index) => ({
@@ -383,8 +340,7 @@ app.post('/api/generate-questions', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('❌ Erro ao gerar questões:', error);
         res.status(500).json({ 
-            message: 'Erro ao gerar questões. Tente novamente.',
-            error: error.message
+            message: 'Erro ao gerar questões. Tente novamente.'
         });
     }
 });
@@ -392,6 +348,10 @@ app.post('/api/generate-questions', authenticateToken, async (req, res) => {
 // Rota para verificar respostas
 app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
     try {
+        res.header('Access-Control-Allow-Origin', 'https://smarttestai.netlify.app');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
         const { subject, answers, questionsData } = req.body;
         const userId = req.user.id;
 
@@ -401,9 +361,7 @@ app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
 
         let correctCount = 0;
         let totalPoints = 0;
-        const results = [];
 
-        // Verificar cada resposta
         answers.forEach((answer, index) => {
             if (index < questionsData.length) {
                 const questionData = questionsData[index];
@@ -411,22 +369,11 @@ app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
                 
                 if (isCorrect) {
                     correctCount++;
-                    const points = questionData.difficulty === 'easy' ? 50 : 
-                                 questionData.difficulty === 'medium' ? 100 : 150;
-                    totalPoints += points;
+                    totalPoints += 100;
                 }
-
-                results.push({
-                    questionId: index + 1,
-                    userAnswer: answer,
-                    correctAnswer: questionData.correctAnswer,
-                    isCorrect: isCorrect,
-                    question: questionData.question
-                });
             }
         });
 
-        // Atualizar pontuação do usuário
         const userIndex = users.findIndex(user => user.id === userId);
         if (userIndex !== -1) {
             users[userIndex].points += totalPoints;
@@ -439,7 +386,6 @@ app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
             totalQuestions: answers.length,
             accuracy: accuracy,
             points: totalPoints,
-            results: results,
             recommendations: [
                 "Continue praticando regularmente",
                 "Revise os tópicos com maior dificuldade",
@@ -455,6 +401,10 @@ app.post('/api/submit-quiz', authenticateToken, async (req, res) => {
 // Rotas restantes
 app.get('/api/ranking', (req, res) => {
     try {
+        res.header('Access-Control-Allow-Origin', 'https://smarttestai.netlify.app');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
         const allUsers = [...rankings, ...users.map(user => ({
             id: user.id,
             name: user.name,
@@ -470,8 +420,7 @@ app.get('/api/ranking', (req, res) => {
         }));
 
         res.json({
-            ranking: rankingWithPosition.slice(0, 20),
-            period: 'global'
+            ranking: rankingWithPosition.slice(0, 20)
         });
     } catch (error) {
         console.error('❌ Erro ao obter ranking:', error);
@@ -479,30 +428,12 @@ app.get('/api/ranking', (req, res) => {
     }
 });
 
-app.get('/api/profile', authenticateToken, (req, res) => {
-    try {
-        const userId = req.user.id;
-        const user = users.find(user => user.id === userId);
-        
-        if (!user) {
-            return res.status(404).json({ message: 'Usuário não encontrado' });
-        }
-
-        res.json({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            points: user.points,
-            createdAt: user.createdAt
-        });
-    } catch (error) {
-        console.error('❌ Erro ao obter perfil:', error);
-        res.status(500).json({ message: 'Erro ao obter perfil' });
-    }
-});
-
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'https://smarttestai.netlify.app');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
     res.json({ 
         status: 'OK', 
         message: 'Server is running',
@@ -515,13 +446,7 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({ 
         message: 'SmartTest API',
-        version: '1.0.0',
-        endpoints: {
-            login: '/api/login',
-            register: '/api/register',
-            questions: '/api/generate-questions',
-            ranking: '/api/ranking'
-        }
+        version: '1.0.0'
     });
 });
 
@@ -531,14 +456,8 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Erro interno do servidor' });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({ message: 'Endpoint não encontrado' });
-});
-
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📱 Frontend: ${FRONTEND_URL}`);
+    console.log(`📱 Frontend: https://smarttestai.netlify.app`);
     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🤖 Gemini: ${model ? '✅ Configurado' : '❌ Não configurado'}`);
 });
