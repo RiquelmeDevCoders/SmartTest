@@ -49,11 +49,11 @@ try {
 
 let users = [];
 let rankings = [
-    { id: 1, name: 'Carlos Silva', points: 2450, avatar: 'C' },
+    { id: 1, name: 'Carlos', points: 2450, avatar: 'C' },
     { id: 2, name: 'Ana Oliveira', points: 2320, avatar: 'A' },
-    { id: 3, name: 'Maria Santos', points: 2150, avatar: 'M' },
-    { id: 4, name: 'Pedro Costa', points: 1980, avatar: 'P' },
-    { id: 5, name: 'Julia Ferreira', points: 1850, avatar: 'J' },
+    { id: 3, name: 'Jean Ferreira', points: 2150, avatar: 'M' },
+    { id: 4, name: 'Mateus Marques', points: 1980, avatar: 'P' },
+    { id: 5, name: 'Breno', points: 1850, avatar: 'J' },
     { id: 6, name: 'Roberto Lima', points: 1720, avatar: 'R' }
 ];
 
@@ -106,6 +106,30 @@ const questionsDatabase = {
             options: ["14", "15", "16", "17"],
             correctAnswer: 0,
             difficulty: "medium"
+        },
+        {
+            question: "Qual é a solução da equação x² - 9 = 0?",
+            options: ["x = 3", "x = -3", "x = ±3", "x = 0"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Se a matriz A é 2x2 com determinante igual a 0, então A é:",
+            options: ["Invertível", "Singular", "Diagonalizável", "Ortogonal"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é a derivada de cos(x)?",
+            options: ["sen(x)", "-sen(x)", "cos(x)", "-cos(x)"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "O limite de (1 + 1/n)^n quando n → ∞ é:",
+            options: ["0", "1", "e", "∞"],
+            correctAnswer: 2,
+            difficulty: "hard"
         }
     ],
     portugues: [
@@ -156,6 +180,30 @@ const questionsDatabase = {
             options: ["e", "mas", "ou", "logo"],
             correctAnswer: 1,
             difficulty: "easy"
+        },
+        {
+            question: "Qual é o antônimo de 'feliz'?",
+            options: ["alegre", "contente", "triste", "satisfeito"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Na frase 'A casa é grande', a palavra 'grande' é:",
+            options: ["Sujeito", "Predicativo", "Objeto direto", "Adjunto adnominal"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é o tipo de discurso em 'Ele disse que viria amanhã'?",
+            options: ["Direto", "Indireto", "Indireto livre", "Narrativo"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual oração apresenta voz passiva?",
+            options: ["O menino chutou a bola.", "A bola foi chutada pelo menino.", "Ele chutava bolas.", "Chutaram a bola."],
+            correctAnswer: 1,
+            difficulty: "medium"
         }
     ],
     historia: [
@@ -206,6 +254,30 @@ const questionsDatabase = {
             options: ["15 de novembro de 1889", "7 de setembro de 1822", "13 de maio de 1888", "15 de novembro de 1891"],
             correctAnswer: 0,
             difficulty: "medium"
+        },
+        {
+            question: "Quem foi o líder da Revolução Russa de 1917?",
+            options: ["Lênin", "Stálin", "Trotsky", "Czar Nicolau II"],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual civilização construiu as pirâmides de Gizé?",
+            options: ["Mesopotâmica", "Egípcia", "Romana", "Maya"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual tratado encerrou a Primeira Guerra Mundial?",
+            options: ["Tratado de Tordesilhas", "Tratado de Versalhes", "Tratado de Viena", "Tratado de Paris"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Em que ano ocorreu a Independência do Brasil?",
+            options: ["1808", "1822", "1831", "1889"],
+            correctAnswer: 1,
+            difficulty: "easy"
         }
     ],
     geografia: [
@@ -254,6 +326,30 @@ const questionsDatabase = {
         {
             question: "Qual é a montanha mais alta do mundo?",
             options: ["K2", "Monte Everest", "Monte McKinley", "Monte Aconcágua"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a capital do Canadá?",
+            options: ["Toronto", "Ottawa", "Vancouver", "Montreal"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual bioma brasileiro é conhecido pela grande biodiversidade e pela floresta densa?",
+            options: ["Cerrado", "Pantanal", "Amazônia", "Caatinga"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual deserto é o maior do mundo?",
+            options: ["Saara", "Gobi", "Kalahari", "Atacama"],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual oceano banha a costa leste do Brasil?",
+            options: ["Pacífico", "Atlântico", "Índico", "Ártico"],
             correctAnswer: 1,
             difficulty: "easy"
         }
@@ -306,6 +402,30 @@ const questionsDatabase = {
             options: ["Defesa", "Coagulação", "Transporte de oxigênio", "Digestão"],
             correctAnswer: 2,
             difficulty: "easy"
+        },
+        {
+            question: "Qual é a molécula que carrega energia nas células?",
+            options: ["ADP", "ATP", "GTP", "NADH"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual grupo de animais é caracterizado por serem vertebrados e possuírem penas?",
+            options: ["Peixes", "Anfíbios", "Répteis", "Aves"],
+            correctAnswer: 3,
+            difficulty: "easy"
+        },
+        {
+            question: "Onde ocorre a troca gasosa nos pulmões?",
+            options: ["Traqueia", "Bronquíolos", "Alvéolos", "Diafragma"],
+            correctAnswer: 2,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual estrutura celular contém o material genético?",
+            options: ["Cloroplasto", "Mitocôndria", "Núcleo", "Lisossomo"],
+            correctAnswer: 2,
+            difficulty: "easy"
         }
     ],
     quimica: [
@@ -355,6 +475,30 @@ const questionsDatabase = {
             question: "Qual é a unidade de medida da quantidade de matéria?",
             options: ["Mol", "Grama", "Litro", "Joule"],
             correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual elemento químico é representado pelo símbolo 'Fe'?",
+            options: ["Ferro", "Fósforo", "Flúor", "Francium"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a fórmula química do ácido sulfúrico?",
+            options: ["HCl", "H2SO4", "HNO3", "H2CO3"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual estado físico da matéria possui forma e volume fixos?",
+            options: ["Sólido", "Líquido", "Gasoso", "Plasma"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual processo separa misturas por diferença de ponto de ebulição?",
+            options: ["Filtração", "Destilação", "Decantação", "Centrifugação"],
+            correctAnswer: 1,
             difficulty: "medium"
         }
     ],
@@ -406,6 +550,30 @@ const questionsDatabase = {
             options: ["Joule", "Newton", "Watt", "Pascal"],
             correctAnswer: 2,
             difficulty: "easy"
+        },
+        {
+            question: "Qual é a fórmula da força segundo Newton?",
+            options: ["F = m/v", "F = m·a", "F = p·v", "F = E/t"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual partícula é responsável pela corrente elétrica em metais?",
+            options: ["Prótons", "Nêutrons", "Elétrons", "Íons"],
+            correctAnswer: 2,
+            difficulty: "medium"
+        },
+        {
+            question: "A energia potencial gravitacional é dada por:",
+            options: ["E = mv²/2", "E = mgh", "E = mc²", "E = q·V"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual fenômeno explica a separação da luz branca em um prisma?",
+            options: ["Reflexão", "Refração", "Difração", "Interferência"],
+            correctAnswer: 1,
+            difficulty: "medium"
         }
     ],
     ingles: [
@@ -456,9 +624,34 @@ const questionsDatabase = {
             options: ["am", "was", "were", "be"],
             correctAnswer: 2,
             difficulty: "medium"
+        },
+        {
+            question: "What is the opposite of 'hot'?",
+            options: ["warm", "cold", "cool", "chill"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Which sentence is in present perfect?",
+            options: ["I went to school.", "I have gone to school.", "I go to school.", "I was going to school."],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "What does 'quickly' describe in the sentence 'He runs quickly'?",
+            options: ["Subject", "Verb", "Adverb", "Adjective"],
+            correctAnswer: 2,
+            difficulty: "medium"
+        },
+        {
+            question: "Choose the correct option: 'There ___ many books on the table.'",
+            options: ["is", "are", "am", "be"],
+            correctAnswer: 1,
+            difficulty: "easy"
         }
     ]
 };
+
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -758,18 +951,37 @@ function generateRecommendations(accuracy, subject) {
         recommendations.push(`Revise os conceitos básicos de ${subject}`);
         recommendations.push("Dedique mais tempo aos estudos diários");
         recommendations.push("Procure exercícios de nível básico para fortalecer a base");
+        recommendations.push("Assista a vídeos explicativos no YouTube ou plataformas de ensino");
+        recommendations.push("Faça anotações à mão para fixar melhor o conteúdo");
+        recommendations.push("Peça ajuda a um professor ou colega de confiança");
+        recommendations.push("Organize um cronograma com metas pequenas e alcançáveis");
     } else if (accuracy < 70) {
         recommendations.push("Continue praticando regularmente");
         recommendations.push(`Foque nos tópicos mais difíceis de ${subject}`);
         recommendations.push("Faça resumos dos conteúdos estudados");
+        recommendations.push("Resolva provas anteriores ou simulados");
+        recommendations.push("Explique a matéria em voz alta como se estivesse ensinando");
+        recommendations.push("Utilize mapas mentais para relacionar os conteúdos");
+        recommendations.push("Participe de grupos de estudo para trocar conhecimento");
     } else {
         recommendations.push("Excelente desempenho! Continue assim");
         recommendations.push("Tente questões de nível mais avançado");
         recommendations.push("Ajude colegas com dificuldades na matéria");
+        recommendations.push("Busque aprofundamento em livros ou artigos especializados");
+        recommendations.push("Explore temas relacionados para expandir seu conhecimento");
+        recommendations.push("Mantenha a regularidade, mesmo já estando em bom nível");
+        recommendations.push("Estabeleça novos desafios pessoais, como competições ou olimpíadas");
     }
     
+    
+    recommendations.push("Faça pausas regulares para evitar cansaço mental");
+    recommendations.push("Durma bem para melhorar a retenção da memória");
+    recommendations.push("Use aplicativos de organização de tarefas e estudos");
+    recommendations.push("Equilibre estudo com lazer e atividade física");
+
     return recommendations;
 }
+
 
 app.get('/api/ranking', (req, res) => {
     try {
