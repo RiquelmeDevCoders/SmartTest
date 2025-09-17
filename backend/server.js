@@ -59,7 +59,6 @@ let rankings = [
 
 const questionsDatabase = {
     matematica: [
-        // Questões existentes
         {
             question: "Qual é a derivada de f(x) = x² + 3x + 2?",
             options: ["2x + 3", "x² + 3", "2x + 2", "x + 3"],
@@ -132,7 +131,6 @@ const questionsDatabase = {
             correctAnswer: 2,
             difficulty: "hard"
         },
-        // Novas questões
         {
             question: "Quanto é 5 + 3 × 2?",
             options: ["10", "11", "16", "13"],
@@ -177,7 +175,6 @@ const questionsDatabase = {
         }
     ],
     portugues: [
-        // Questões existentes
         {
             question: "Qual é a classificação morfológica da palavra 'correndo'?",
             options: ["Verbo", "Gerúndio", "Advérbio", "Substantivo"],
@@ -250,7 +247,6 @@ const questionsDatabase = {
             correctAnswer: 1,
             difficulty: "medium"
         },
-        // Novas questões
         {
             question: "Quantas letras tem o alfabeto português?",
             options: ["23", "26", "25", "24"],
@@ -295,7 +291,6 @@ const questionsDatabase = {
         }
     ],
     historia: [
-        // Questões existentes
         {
             question: "Em que ano o Brasil foi descoberto?",
             options: ["1498", "1500", "1501", "1502"],
@@ -368,7 +363,6 @@ const questionsDatabase = {
             correctAnswer: 1,
             difficulty: "easy"
         },
-        // Novas questões
         {
             question: "Quem descobriu o Brasil?",
             options: ["Vasco da Gama", "Pedro Álvares Cabral", "Cristóvão Colombo", "Fernão de Magalhães"],
@@ -413,7 +407,6 @@ const questionsDatabase = {
         }
     ],
     geografia: [
-        // Questões existentes
         {
             question: "Qual é o maior país do mundo em extensão territorial?",
             options: ["China", "Canadá", "Rússia", "Estados Unidos"],
@@ -486,7 +479,6 @@ const questionsDatabase = {
             correctAnswer: 1,
             difficulty: "easy"
         },
-        // Novas questões
         {
             question: "Quantos continentes existem no mundo?",
             options: ["5", "6", "7", "8"],
@@ -531,7 +523,6 @@ const questionsDatabase = {
         }
     ],
     biologia: [
-        // Questões existentes
         {
             question: "Qual é a unidade básica da vida?",
             options: ["Átomo", "Molécula", "Célula", "Tecido"],
@@ -604,7 +595,6 @@ const questionsDatabase = {
             correctAnswer: 2,
             difficulty: "easy"
         },
-        // Novas questões
         {
             question: "Quantos ossos tem o corpo humano adulto aproximadamente?",
             options: ["150", "186", "206", "250"],
@@ -722,7 +712,6 @@ const questionsDatabase = {
             correctAnswer: 1,
             difficulty: "medium"
         },
-        // Novas questões
         {
             question: "Qual é o símbolo químico da prata?",
             options: ["Pt", "Ag", "Au", "Al"],
@@ -767,7 +756,6 @@ const questionsDatabase = {
         }
     ],
     fisica: [
-        // Questões existentes
         {
             question: "Qual é a velocidade da luz no vácuo?",
             options: ["300.000 km/s", "150.000 km/s", "450.000 km/s", "600.000 km/s"],
@@ -840,7 +828,6 @@ const questionsDatabase = {
             correctAnswer: 1,
             difficulty: "medium"
         },
-        // Novas questões
         {
             question: "O que é um elétron?",
             options: ["Partícula positiva", "Partícula negativa", "Partícula neutra", "Núcleo do átomo"],
@@ -885,7 +872,6 @@ const questionsDatabase = {
         }
     ],
     ingles: [
-        // Questões existentes
         {
             question: "What is the past tense of 'go'?",
             options: ["goed", "went", "gone", "going"],
@@ -958,7 +944,6 @@ const questionsDatabase = {
             correctAnswer: 1,
             difficulty: "easy"
         },
-        // Novas questões
         {
             question: "What color is the sun?",
             options: ["blue", "green", "yellow", "red"],
