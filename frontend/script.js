@@ -47,10 +47,16 @@ function initializeApp() {
     setupQuiz();
     setupActionButtons();
     
+    // Inicializar perfil primeiro
     if (authToken) {
         updateAuthUI(true);
-        loadUserProfile();
-        loadRanking();
+        // Carregar dados do usuário
+        loadUserProfile().then(() => {
+            loadRanking();
+        });
+    } else {
+        // Limpar perfil se não estiver logado
+        clearProfileDisplay();
     }
 }
 
@@ -125,69 +131,88 @@ function setupNavigation() {
 }
 
 async function loadUserProfile() {
+    if (!authToken) {
+        clearProfileDisplay();
+        return;
+    }
+
     try {
         const response = await authenticatedFetch(`${API_BASE_URL}/profile`);
-        if (!response) return;
+        if (!response) {
+            clearProfileDisplay();
+            return;
+        }
 
         const data = await response.json();
         if (response.ok) {
             currentUser = data.user;
             updateProfileDisplay();
+        } else {
+            console.error('Erro ao carregar perfil:', data.message);
+            clearProfileDisplay();
         }
     } catch (error) {
         console.error('Erro ao carregar perfil:', error);
+        clearProfileDisplay();
     }
 }
 
 function updateProfileDisplay() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        clearProfileDisplay();
+        return;
+    }
 
     // Atualizar nome do usuário
     const userNameEl = document.getElementById('user-name');
     if (userNameEl) {
-        userNameEl.textContent = currentUser.name;
+        userNameEl.textContent = currentUser.name || 'Nome não disponível';
     }
 
     // Atualizar email do usuário
     const userEmailEl = document.getElementById('user-email');
     if (userEmailEl) {
-        userEmailEl.textContent = currentUser.email;
+        userEmailEl.textContent = currentUser.email || 'Email não disponível';
     }
 
     // Atualizar pontos do usuário
     const userPointsEl = document.getElementById('user-points');
     if (userPointsEl) {
-        userPointsEl.textContent = `${currentUser.points} pontos`;
+        userPointsEl.textContent = `${currentUser.points || 0} pontos`;
     }
 
     // Atualizar avatar (primeira letra do nome)
     const userAvatarEl = document.getElementById('user-avatar');
-    if (userAvatarEl) {
+    if (userAvatarEl && currentUser.name) {
         userAvatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
     }
 
     // Atualizar data de cadastro se existir
     const memberSinceEl = document.getElementById('member-since');
     if (memberSinceEl && currentUser.createdAt) {
-        const date = new Date(currentUser.createdAt);
-        const formattedDate = date.toLocaleDateString('pt-BR');
-        memberSinceEl.textContent = `Membro desde ${formattedDate}`;
+        try {
+            const date = new Date(currentUser.createdAt);
+            const formattedDate = date.toLocaleDateString('pt-BR');
+            memberSinceEl.textContent = `Membro desde ${formattedDate}`;
+        } catch (error) {
+            memberSinceEl.textContent = 'Data não disponível';
+        }
     }
 }
 
 function clearProfileDisplay() {
-    const elements = [
-        'user-name',
-        'user-email', 
-        'user-points',
-        'user-avatar',
-        'member-since'
-    ];
+    const profileData = {
+        'user-name': 'Faça login para ver seu perfil',
+        'user-email': '',
+        'user-points': '0 pontos',
+        'user-avatar': '?',
+        'member-since': ''
+    };
 
-    elements.forEach(id => {
+    Object.entries(profileData).forEach(([id, defaultText]) => {
         const el = document.getElementById(id);
         if (el) {
-            el.textContent = '';
+            el.textContent = defaultText;
         }
     });
 }
@@ -292,29 +317,49 @@ async function handleLogin(e) {
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Entrando...';
+    }
+
     try {
+        console.log('Tentando login para:', email);
+        
         const response = await fetch(`${API_BASE_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
+        console.log('Resposta do login:', response.status);
+        
         const data = await response.json();
+        console.log('Dados do login:', data);
 
         if (response.ok) {
             authToken = data.token;
             currentUser = data.user;
             localStorage.setItem('authToken', authToken);
+            
             updateAuthUI(true);
             if (loginModal) loginModal.classList.remove('show');
             showNotification('Login realizado com sucesso!', 'success');
             document.getElementById('loginForm').reset();
+            
+            // Carregar perfil após login bem-sucedido
+            await loadUserProfile();
         } else {
             showNotification(data.message || 'Erro ao fazer login', 'error');
         }
     } catch (error) {
         console.error('Erro no login:', error);
         showNotification('Erro de conexão. Tente novamente.', 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Entrar';
+        }
     }
 }
 
@@ -341,29 +386,49 @@ async function handleRegister(e) {
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Criando conta...';
+    }
+
     try {
+        console.log('Tentando cadastrar:', { name, email });
+        
         const response = await fetch(`${API_BASE_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
         });
 
+        console.log('Resposta do cadastro:', response.status);
+        
         const data = await response.json();
+        console.log('Dados do cadastro:', data);
 
         if (response.ok) {
             authToken = data.token;
             currentUser = data.user;
             localStorage.setItem('authToken', authToken);
+            
             updateAuthUI(true);
             if (registerModal) registerModal.classList.remove('show');
             showNotification('Conta criada com sucesso!', 'success');
             document.getElementById('registerForm').reset();
+            
+            // Carregar perfil após cadastro bem-sucedido
+            await loadUserProfile();
         } else {
             showNotification(data.message || 'Erro ao criar conta', 'error');
         }
     } catch (error) {
         console.error('Erro no registro:', error);
         showNotification('Erro de conexão. Tente novamente.', 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Criar Conta';
+        }
     }
 }
 
@@ -753,30 +818,91 @@ function capitalizeFirstLetter(string) {
 }
 
 function showNotification(message, type = 'info') {
+    // Remover notificação existente
     const existingNotification = document.querySelector('.notification');
     if (existingNotification) {
         existingNotification.remove();
     }
 
+    // Criar nova notificação
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
         <span>${message}</span>
-        <button class="notification-close">&times;</button>
+        <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
     `;
+
+    // Adicionar estilos inline se não existirem
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        min-width: 300px;
+        max-width: 500px;
+        animation: slideIn 0.3s ease-out;
+    `;
+
+    // Definir cores baseadas no tipo
+    const colors = {
+        'success': '#4CAF50',
+        'error': '#f44336',
+        'warning': '#ff9800',
+        'info': '#2196F3'
+    };
+    
+    notification.style.backgroundColor = colors[type] || colors.info;
+
+    // Estilizar botão de fechar
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.style.cssText = `
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        opacity: 0.8;
+    `;
+    
+    closeBtn.onmouseover = () => closeBtn.style.opacity = '1';
+    closeBtn.onmouseout = () => closeBtn.style.opacity = '0.8';
 
     document.body.appendChild(notification);
 
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.addEventListener('click', () => {
-        notification.remove();
-    });
-
+    // Auto-remover após 5 segundos
     setTimeout(() => {
         if (notification.parentNode) {
-            notification.remove();
+            notification.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => notification.remove(), 300);
         }
     }, 5000);
+
+    // Adicionar animações CSS se não existirem
+    if (!document.querySelector('#notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 window.loadQuestions = loadQuestions;
