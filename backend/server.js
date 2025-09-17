@@ -59,6 +59,7 @@ let rankings = [
 
 const questionsDatabase = {
     matematica: [
+        // Questões existentes
         {
             question: "Qual é a derivada de f(x) = x² + 3x + 2?",
             options: ["2x + 3", "x² + 3", "2x + 2", "x + 3"],
@@ -130,9 +131,53 @@ const questionsDatabase = {
             options: ["0", "1", "e", "∞"],
             correctAnswer: 2,
             difficulty: "hard"
+        },
+        // Novas questões
+        {
+            question: "Quanto é 5 + 3 × 2?",
+            options: ["10", "11", "16", "13"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a área de um quadrado com lado 4?",
+            options: ["8", "12", "16", "20"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Quanto é 10% de 200?",
+            options: ["10", "20", "30", "40"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a raiz quadrada de 64?",
+            options: ["6", "7", "8", "9"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Em uma função linear y = 3x + 2, qual é o coeficiente angular?",
+            options: ["2", "3", "x", "y"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é o perímetro de um retângulo com lados 5 e 8?",
+            options: ["13", "26", "40", "18"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Se x + 7 = 15, qual é o valor de x?",
+            options: ["7", "8", "9", "22"],
+            correctAnswer: 1,
+            difficulty: "easy"
         }
     ],
     portugues: [
+        // Questões existentes
         {
             question: "Qual é a classificação morfológica da palavra 'correndo'?",
             options: ["Verbo", "Gerúndio", "Advérbio", "Substantivo"],
@@ -204,9 +249,53 @@ const questionsDatabase = {
             options: ["O menino chutou a bola.", "A bola foi chutada pelo menino.", "Ele chutava bolas.", "Chutaram a bola."],
             correctAnswer: 1,
             difficulty: "medium"
+        },
+        // Novas questões
+        {
+            question: "Quantas letras tem o alfabeto português?",
+            options: ["23", "26", "25", "24"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é o sinônimo de 'bonito'?",
+            options: ["feio", "belo", "ruim", "baixo"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Complete: 'Ela _____ estudando ontem.'",
+            options: ["estava", "estar", "esteve", "estará"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual palavra é um substantivo próprio?",
+            options: ["mesa", "João", "bonito", "correr"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a primeira pessoa do singular do verbo 'ser' no presente?",
+            options: ["é", "sou", "somos", "são"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Em 'Dom Casmurro', quem é o protagonista?",
+            options: ["Capitu", "Bentinho", "Escobar", "José Dias"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é a função da vírgula em 'João, venha aqui'?",
+            options: ["Separar adjunto", "Marcar vocativo", "Separar orações", "Marcar aposto"],
+            correctAnswer: 1,
+            difficulty: "medium"
         }
     ],
     historia: [
+        // Questões existentes
         {
             question: "Em que ano o Brasil foi descoberto?",
             options: ["1498", "1500", "1501", "1502"],
@@ -278,9 +367,53 @@ const questionsDatabase = {
             options: ["1808", "1822", "1831", "1889"],
             correctAnswer: 1,
             difficulty: "easy"
+        },
+        // Novas questões
+        {
+            question: "Quem descobriu o Brasil?",
+            options: ["Vasco da Gama", "Pedro Álvares Cabral", "Cristóvão Colombo", "Fernão de Magalhães"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Em que ano começou a Primeira Guerra Mundial?",
+            options: ["1912", "1914", "1916", "1918"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual foi a capital do Brasil antes de Brasília?",
+            options: ["Salvador", "Rio de Janeiro", "São Paulo", "Recife"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Quem foi D. Pedro I?",
+            options: ["Rei de Portugal", "Imperador do Brasil", "Presidente do Brasil", "Príncipe da França"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Em que ano foi abolida a escravidão no Brasil?",
+            options: ["1885", "1888", "1890", "1889"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "A Guerra do Paraguai ocorreu entre os anos:",
+            options: ["1864-1870", "1860-1866", "1865-1871", "1862-1868"],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual presidente brasileiro fundou Brasília?",
+            options: ["Getúlio Vargas", "Juscelino Kubitschek", "Café Filho", "Jânio Quadros"],
+            correctAnswer: 1,
+            difficulty: "medium"
         }
     ],
     geografia: [
+        // Questões existentes
         {
             question: "Qual é o maior país do mundo em extensão territorial?",
             options: ["China", "Canadá", "Rússia", "Estados Unidos"],
@@ -352,9 +485,53 @@ const questionsDatabase = {
             options: ["Pacífico", "Atlântico", "Índico", "Ártico"],
             correctAnswer: 1,
             difficulty: "easy"
+        },
+        // Novas questões
+        {
+            question: "Quantos continentes existem no mundo?",
+            options: ["5", "6", "7", "8"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a capital do Brasil?",
+            options: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Em que estado brasileiro fica a cidade de Recife?",
+            options: ["Bahia", "Ceará", "Pernambuco", "Alagoas"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a capital da França?",
+            options: ["Londres", "Madri", "Roma", "Paris"],
+            correctAnswer: 3,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual região do Brasil tem o maior território?",
+            options: ["Norte", "Nordeste", "Centro-Oeste", "Sudeste"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual país faz fronteira com o Brasil ao sul?",
+            options: ["Argentina", "Chile", "Peru", "Bolívia"],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é a linha imaginária que divide a Terra em hemisférios norte e sul?",
+            options: ["Trópico de Câncer", "Trópico de Capricórnio", "Equador", "Meridiano de Greenwich"],
+            correctAnswer: 2,
+            difficulty: "medium"
         }
     ],
     biologia: [
+        // Questões existentes
         {
             question: "Qual é a unidade básica da vida?",
             options: ["Átomo", "Molécula", "Célula", "Tecido"],
@@ -426,9 +603,53 @@ const questionsDatabase = {
             options: ["Cloroplasto", "Mitocôndria", "Núcleo", "Lisossomo"],
             correctAnswer: 2,
             difficulty: "easy"
+        },
+        // Novas questões
+        {
+            question: "Quantos ossos tem o corpo humano adulto aproximadamente?",
+            options: ["150", "186", "206", "250"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual órgão produz a insulina?",
+            options: ["Fígado", "Pâncreas", "Rim", "Coração"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Os animais que se alimentam apenas de plantas são chamados de:",
+            options: ["Carnívoros", "Herbívoros", "Onívoros", "Detritívoros"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é o maior órgão do corpo humano?",
+            options: ["Fígado", "Pulmão", "Pele", "Cérebro"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "As plantas fazem fotossíntese principalmente através das:",
+            options: ["Raízes", "Flores", "Folhas", "Frutos"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual classe de animais inclui sapos e rãs?",
+            options: ["Répteis", "Peixes", "Anfíbios", "Mamíferos"],
+            correctAnswer: 2,
+            difficulty: "medium"
+        },
+        {
+            question: "Quantos pares de cromossomos tem a espécie humana?",
+            options: ["22", "23", "24", "25"],
+            correctAnswer: 1,
+            difficulty: "medium"
         }
     ],
     quimica: [
+        // Questões existentes
         {
             question: "Qual é o símbolo químico do ouro?",
             options: ["Au", "Ag", "Al", "Ar"],
@@ -500,9 +721,53 @@ const questionsDatabase = {
             options: ["Filtração", "Destilação", "Decantação", "Centrifugação"],
             correctAnswer: 1,
             difficulty: "medium"
+        },
+        // Novas questões
+        {
+            question: "Qual é o símbolo químico da prata?",
+            options: ["Pt", "Ag", "Au", "Al"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Quantos átomos tem uma molécula de água?",
+            options: ["2", "3", "4", "5"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "O que é uma mistura homogênea?",
+            options: ["Uma única fase", "Duas fases", "Três fases", "Fases diferentes"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual gás respiramos para viver?",
+            options: ["Nitrogênio", "Oxigênio", "Hidrogênio", "Carbono"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é o símbolo do elemento sódio?",
+            options: ["S", "Na", "N", "So"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "A temperatura de ebulição da água ao nível do mar é:",
+            options: ["90°C", "95°C", "100°C", "105°C"],
+            correctAnswer: 2,
+            difficulty: "medium"
+        },
+        {
+            question: "Qual é a carga elétrica de um próton?",
+            options: ["Positiva", "Negativa", "Neutra", "Variável"],
+            correctAnswer: 0,
+            difficulty: "medium"
         }
     ],
     fisica: [
+        // Questões existentes
         {
             question: "Qual é a velocidade da luz no vácuo?",
             options: ["300.000 km/s", "150.000 km/s", "450.000 km/s", "600.000 km/s"],
@@ -574,9 +839,53 @@ const questionsDatabase = {
             options: ["Reflexão", "Refração", "Difração", "Interferência"],
             correctAnswer: 1,
             difficulty: "medium"
+        },
+        // Novas questões
+        {
+            question: "O que é um elétron?",
+            options: ["Partícula positiva", "Partícula negativa", "Partícula neutra", "Núcleo do átomo"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a unidade de temperatura no SI?",
+            options: ["Celsius", "Fahrenheit", "Kelvin", "Rankine"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "O som se propaga mais rápido em qual meio?",
+            options: ["Ar", "Água", "Sólidos", "Vácuo"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a unidade de energia no SI?",
+            options: ["Newton", "Watt", "Joule", "Pascal"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "O que acontece com um objeto em queda livre?",
+            options: ["Acelera", "Velocidade constante", "Desacelera", "Para no ar"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "Qual é a velocidade do som no ar aproximadamente?",
+            options: ["340 m/s", "300 m/s", "400 m/s", "500 m/s"],
+            correctAnswer: 0,
+            difficulty: "medium"
+        },
+        {
+            question: "O que é densidade?",
+            options: ["Massa por volume", "Volume por massa", "Força por área", "Energia por tempo"],
+            correctAnswer: 0,
+            difficulty: "medium"
         }
     ],
     ingles: [
+        // Questões existentes
         {
             question: "What is the past tense of 'go'?",
             options: ["goed", "went", "gone", "going"],
@@ -648,6 +957,49 @@ const questionsDatabase = {
             options: ["is", "are", "am", "be"],
             correctAnswer: 1,
             difficulty: "easy"
+        },
+        // Novas questões
+        {
+            question: "What color is the sun?",
+            options: ["blue", "green", "yellow", "red"],
+            correctAnswer: 2,
+            difficulty: "easy"
+        },
+        {
+            question: "How do you say 'olá' in English?",
+            options: ["goodbye", "hello", "please", "thank you"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "What is the opposite of 'big'?",
+            options: ["large", "small", "huge", "tall"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Complete: 'I ___ a student.'",
+            options: ["am", "is", "are", "be"],
+            correctAnswer: 0,
+            difficulty: "easy"
+        },
+        {
+            question: "What does 'cat' mean in Portuguese?",
+            options: ["cão", "gato", "pássaro", "peixe"],
+            correctAnswer: 1,
+            difficulty: "easy"
+        },
+        {
+            question: "Which is correct: 'She ___ every day.'?",
+            options: ["study", "studies", "studied", "studying"],
+            correctAnswer: 1,
+            difficulty: "medium"
+        },
+        {
+            question: "What is the past tense of 'eat'?",
+            options: ["eated", "ate", "eaten", "eating"],
+            correctAnswer: 1,
+            difficulty: "medium"
         }
     ]
 };
