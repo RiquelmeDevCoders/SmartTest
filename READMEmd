@@ -1,0 +1,89 @@
+# SmartTest AI  
+
+
+## 📌 Visão Geral  
+O **SmartTest AI** é uma plataforma educacional inovadora que utiliza inteligência artificial para oferecer testes personalizados, análises de desempenho e recomendações de estudo.  
+O objetivo é proporcionar uma experiência de aprendizado adaptativa e eficaz, ajudando alunos de diferentes níveis a evoluírem no conhecimento por meio de diagnósticos inteligentes.  
+
+Este projeto foi **desenvolvido em grupo**, unindo diferentes habilidades técnicas e criativas para entregar um sistema completo e funcional.  
+
+---
+
+## 🚀 Funcionalidades  
+- **Teste de Diagnóstico Inicial**: Ao acessar a plataforma, o aluno realiza testes rápidos em diversas disciplinas.  
+- **Análise com IA**: A inteligência artificial avalia o desempenho e detecta pontos fortes e fracos.  
+- **Sugestões de Estudo**: Com base nos resultados, a IA recomenda conteúdos personalizados.  
+- **Biblioteca Digital Interativa**:  
+- Catálogo de livros e artigos por categoria.  
+- Possibilidade de favoritar conteúdos e fazer anotações.  
+- Sugestões de leitura baseadas no histórico do aluno.  
+- **Chat com IA**:  
+- Espaço para o aluno tirar dúvidas em tempo real.  
+- A IA auxilia com explicações, exemplos práticos e resolução de exercícios.  
+- **Sistema de Autenticação**:  
+- Login e cadastro com e-mail e senha.  
+- Opções de login social (Google, Twitter, GitHub).  
+- **Banco de Dados Dinâmico**:  
+- Armazena perfis de usuários, progresso, postagens e anotações.  
+Exibição de informações sempre atualizadas em tempo real.  
+
+---
+
+## 🛠️ Tecnologias Utilizadas  
+- **Frontend**:  
+- HTML5, CSS3 e JavaScript.  
+- Frameworks modernos para responsividade e interatividade.  
+- **Backend**:  
+- Node.js com Express.  
+- Integração com IA (Gemini 1.5).  
+- **Banco de Dados**:  
+- PostgreSQL / Supabase para dados dinâmicos.  
+- **Integrações Extras**:  
+- APIs de IA.  
+- Autenticação via OAuth.  
+
+---
+
+## 🎨 Identidade Visual  
+- **Cores Principais**: Azul, roxo e branco, transmitindo tecnologia e confiabilidade.  
+- **Logo**: Representa modernidade, aprendizado contínuo e integração com inteligência artificial.  
+- **Estilo Visual**: Minimalista, interativo e com elementos de design moderno.  
+
+---
+
+## 📂 Estrutura do Projeto  
+```bash
+SmartTest-AI/
+│── frontend/          # Código da interface do usuário
+│   ├── index.html
+│   ├── styles.css
+│   ├── script.js
+│
+│── backend/           # Servidor e APIs
+│   ├── server.js
+│   ├── routes/
+│   ├── controllers/
+│
+│── database/          # Scripts e modelos do banco de dados
+│   ├── schema.sql
+│
+│── assets/            # Imagens e mídias do projeto
+│   ├── logo.png
+│
+│── README.md          # Documentação do projeto
+👨‍💻 Desenvolvimento em Grupo
+O SmartTest AI foi construído por uma equipe colaborativa, onde cada integrante contribuiu com diferentes áreas:
+
+Design UI/UX – Responsável pela identidade visual, protótipos e experiência do usuário.
+
+Frontend – Estruturação das telas, animações, responsividade e interatividade.
+
+Backend – Implementação de rotas, autenticação, integração com IA e banco de dados.
+
+Documentação – Criação de guias, organização da estrutura e relatórios do projeto.
+
+📈 Objetivo Final
+Criar uma plataforma educacional que potencialize o aprendizado com inteligência artificial, sendo acessível, responsiva e altamente interativa, ajudando alunos a atingirem seus objetivos acadêmicos.
+
+📜 Licença
+Este projeto foi desenvolvido exclusivamente para fins acadêmicos e de aprendizado em equipe.
